@@ -1,0 +1,164 @@
+---
+title: "ncyc_diversity_ver1"
+author: "Tord Ranheim"
+date: "2024-10-28"
+output:
+  html_document:
+    keep_md: no
+---
+
+Ncyc diversity (bacteria only)
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dev = "png",
+                      dpi=300,
+                      echo=F,
+                      cache=T, echo=T)
+```
+
+
+
+###loading requisite libraries 
+```{r libraries to load}
+library(tidyverse)
+library(rmarkdown)
+library(knitr)
+library(magrittr)
+library(ggplot2)
+library(dplyr)
+library(phyloseq)
+library(phylosmith)
+library(microbiome)
+library(vegan)
+library(metagMisc)
+library(microViz)
+
+```
+
+
+##Clear the directory and set pathway
+```{r}
+rm(list=ls())
+
+```
+
+
+Data loading
+```{r Load phyloseq objects}
+
+#bacterial nog
+ps_bacteria = readRDS("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Microbial/Metagenome/Processing/Ncyc/Results/ps_ncyc_bac_rar.RDS")
+
+```
+
+
+```{r Load metadata file}
+
+metadata = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Metadata/Result/metadata.txt")
+row.names(metadata) = metadata$Sample
+
+```
+
+
+We are interested in comparing grasslands to their successional endpoint (i.e. Forests), but also to compare different grassland successional stages against each other. For this we create a new metadata set where the forest level is set as reference level for linear models.
+
+```{r Set forest as reference level}
+
+metadata_ref = metadata
+metadata_ref$Succession <- as.factor(metadata_ref$Succession) #Set successional stage as factor
+metadata_ref$Succession <- relevel(metadata_ref$Succession, ref="Forest") #Set forest as reference level
+
+```
+
+
+                                  
+                                        ESTIMATE DIVERSITY
+###################################################################################################
+
+We estimate both shannon diversity (accounting for taxon richness and relative abundances), as well observed species richness
+
+```{r Estimate diversities}
+
+t1 = ps_bacteria %>% estimate_richness(measures = "Shannon")
+names(t1) = "ncyc_diversity_bacteria"
+t1$Sample = row.names(t1)
+
+#Add to metadata
+metadata = left_join(metadata, t1)
+metadata_ref = left_join(metadata_ref, t1)
+
+rm(t1)
+```
+
+
+
+                                  TEST FOR DIFFERENCES - FUNGI
+###################################################################################################
+```{r Load libraries needed for LMMs}
+library(caret)
+library(DHARMa)
+library(jtools)
+library (multcomp)
+library(lme4)
+library(car)
+```
+
+
+Now we test for differences in diversity using linear mixed effect models incorporating the paired structure of the dataset as random factors, together with differences in parent material
+
+```{r test for differences in ncyc diversity}
+
+#Check data distribution
+hist(metadata$ncyc_diversity_bacteria, xlab = "Response", main = "")
+shapiro.test(metadata$ncyc_diversity_bacteria) #Data is skewed
+
+#Test for differences in grasslands relative to forest reference level
+mod1 <- lmer(ncyc_diversity_bacteria ~ Succession + (1|Par) + (1|Parent_material) + (1|Distance),
+             data = metadata_ref)
+
+#Check model disagnostics
+resid <- simulateResiduals(fittedModel = mod1, plot = F)
+plot(resid) #QQ-plot looks ok, residual plots look ok
+
+#Inspect results
+summary(mod1)
+summ(mod1, exp = T)
+
+#Allgrasslands differ from forests
+
+#Now we test for differences between grassland successional stages using the same models but without forests as reference levels
+mod1 <- lmer(ncyc_diversity_bacteria ~ Succession +  (1|Par) + (1|Parent_material) + (1|Distance),
+             data = metadata)
+summary(mod1)
+summ(mod1, exp = T)
+
+#This is followed bymultiple comparisons between all stages
+summary(glht(mod1, mcp(Succession  = "Tukey")))
+#No differences between any of the grassland successional stages 
+
+
+#Estimate effect size using eta squared
+mod2 = lmer(ncyc_diversity_bacteria ~ Ecosystem_type + (1|Par) + (1|Parent_material) + (1|Distance),
+              REML = T, data = metadata)
+
+aov = Anova(mod2, type = 2, test = "F")
+aov
+
+d1 = effectsize::omega_squared(aov, alternative = "two.sided")
+d1$Community = "Bacteria"
+
+```
+
+
+
+```{r Save diversity estimates for plotting}
+
+t1 = metadata %>% dplyr::select(Sample, ncyc_diversity_bacteria)
+
+write.table(t1, file = "./Results/ncyc_diversity.txt")
+write.table(d1, file = "./Results/es_ncyc_diversity.txt")
+
+```
+
+
