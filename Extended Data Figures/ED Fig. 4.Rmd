@@ -1,0 +1,139 @@
+---
+title: "ED Fig. 4"
+author: "Tord Ranheim"
+date: '2024-12-20'
+output:
+  html_document:
+    keep_md: no
+---
+
+
+Code to reproduce the Extended Data Fig. 4
+
+NB! The figure has been manually compiled in pages
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dev = "png",
+                      dpi=300,
+                      echo=F,
+                      cache=T, echo=T)
+```
+
+
+```{r}
+rm(list=ls())
+```
+
+
+Libraries
+```{r}
+library(dplyr)
+library(vegan)
+library(tidyr)
+library(ggplot2)
+library(ggpubr)
+```
+
+
+
+Data loading
+```{r Load data}
+
+#Load metadata
+metadata = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Metadata/Result/metadata.txt")
+row.names(metadata) = metadata$Sample
+
+```
+
+
+
+```{r Load files}
+
+#Pcyc
+pcyc = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Functional redundancy/Niche overlap/Pcyc/Processing/Results/res_lno_pcyc.txt")
+
+```
+
+
+                                        SET PLOT DETAILS
+#############################################################################################
+
+```{r Set plotting details}
+
+
+pcyc$Succession = ordered(pcyc$Succession, levels = c("Managed","Recent","Late","Forest"))
+
+farg = c("#bd0026","#fd8d3c", "#fecc5c", "skyblue2")
+
+```
+
+
+
+                                    EXTENDED DATA FIG. 4
+#############################################################################################
+
+```{r ED Fig. 4a}
+
+p1 <- pcyc %>%
+  filter(Community == "Fungi") %>%
+  ggplot(aes(x= variable, y = value, fill = Succession))+
+  geom_boxplot(outlier.shape = NA)+
+  scale_fill_manual(values = farg)+
+      labs(fill = "Land use", y = "Genetic overlap")+
+      ylim(0.3,1.1)+
+      theme_classic()+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+   theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+  theme(legend.position = "none")+
+     theme(text=element_text(size=20));p1
+```
+
+
+```{r ED Fig. 4b}
+
+p1 <- pcyc %>%
+  filter(Community == "Bacteria") %>%
+  ggplot(aes(x= variable, y = value, fill = Succession))+
+  geom_boxplot(outlier.shape = NA)+
+  scale_fill_manual(values = farg)+
+      labs(fill = "Land use", y = "Genetic overlap")+
+      ylim(0.73,1.1)+
+      theme_classic()+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+   theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+  theme(legend.position = "none")+
+     theme(text=element_text(size=20));p1
+
+
+```
+
+                                    WILCOXON TESTS
+###########################################################################################
+```{r Wilcoxon tests overlap}
+library(rstatix)
+
+#P-cycling
+t1 = pcyc %>%
+  filter(Community == "Fungi") |>
+  wilcox_test(value ~ Succession);t1
+t2 = pcyc %>%
+  filter(Community == "Bacteria") |>
+  wilcox_test(value ~ Succession);t2
+
+#P-cycling by pathways
+t1 = pcyc %>%
+  filter(Community == "Fungi") |>
+  group_by(variable) |>
+  wilcox_test(value ~ Succession);t1
+t2 = pcyc %>%
+  filter(Community == "Bacteria") |>
+  group_by(variable) |>
+  wilcox_test(value ~ Succession);t2
+
+```
+
