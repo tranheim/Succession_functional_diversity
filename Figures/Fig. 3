@@ -1,0 +1,414 @@
+
+#Code to reproduce panels in manuscript figure 3
+
+#NB! The figure has been manually compiled in pages
+
+
+#Clean directory
+rm(list=ls())
+
+
+
+#Libraries
+library(dplyr)
+library(vegan)
+library(tidyr)
+library(ggplot2)
+library(ggpubr)
+
+
+
+
+#Data loading
+#Load metadata
+metadata = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Metadata/Result/metadata.txt")
+row.names(metadata) = metadata$Sample
+
+
+
+
+
+
+
+#Load nog diversity results
+nog_results = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Functional diversity/NOG/Results/nog_diversity.txt")
+
+#Load cazyme diversity results
+cazyme_results = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Functional diversity/Cazyme/Results/cazyme_diversity.txt")
+
+#Load ncyc diversity results
+ncyc_results = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Functional diversity/Ncyc/Results/ncyc_diversity.txt")
+
+#Load pcyc diversity results
+pcyc_results = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Functional diversity/Pcyc/Results/pcyc_diversity.txt")
+
+
+
+
+
+
+
+                                        # PREPARE DATASET
+#############################################################################################
+
+
+#Merge diversity results
+metadata = left_join(metadata,nog_results)
+metadata = left_join(metadata,cazyme_results)
+metadata = left_join(metadata,ncyc_results)
+metadata = left_join(metadata,pcyc_results)
+
+rm(nog_results,cazyme_results,ncyc_results,pcyc_results)
+
+
+
+es_beta = es_beta[c(1,4),]
+
+es_alpha$Diversity = "Alpha"
+es_beta$Diversity = "Beta"
+
+s1 = es_alpha %>% dplyr::select(Community, Omega2_partial, CI_low, CI_high, Diversity)
+s2 = es_beta %>% dplyr::select(Community, parOmegaSq, Diversity)
+names(s2) <- c("Community","Omega2_partial","Diversity")
+s2$CI_low = NA
+s2$CI_high = NA
+s2 = s2[,c(1:2,4:5,3)]
+es = rbind(s1,s2)
+
+
+
+                                        SET PLOT DETAILS
+#############################################################################################
+
+
+
+#Set order of plotting
+metadata$Succession = ordered(metadata$Succession, levels = c("Managed","Recent","Late","Forest"))
+
+#Set manual color and shape
+farg = c("#bd0026","#fd8d3c","#fecc5c", "skyblue2")
+shape = c(21,23,24,25)
+farg2 = "grey59"
+
+#Create median line for forest reference stage
+f = metadata %>% filter(Succession == "Forest") 
+
+
+
+
+
+              # FUNCTIONAL DIVERSITY PLOTS (Figure 3a-e)
+#############################################################################################
+
+
+
+#Create median horizontal line
+h = median(f$cazyme_diversity_fungi, na.rm = T)
+
+#Fungi
+p1 <- metadata %>%
+    bind_rows(tibble(var1 = "trt99")) %>% 
+  ggplot(aes(x= Succession, y = cazyme_diversity_fungi, fill = Succession))+
+  geom_boxplot(aes(fill= Succession),outlier.shape = NA)+
+    geom_point(position=position_jitter(0.1, seed = 123),alpha=0.5)+
+    scale_fill_manual(values=farg, na.translate = F)+
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      ylim(2,4.7)+
+      theme_classic()+
+  scale_x_discrete(limits = c("Managed","Recent","Late","trt99","Forest"),
+  breaks = c("Managed","Recent","Late",NA,"Forest"),
+  labels = c("Managed","Recent","Late",NA,"Forest"))+
+  geom_vline(xintercept = "trt99", linetype = 2, linewidth = 0.2)+
+    geom_hline(yintercept = h, linetype = 2, linewidth = 0.9, col = "black")+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+     theme(text=element_text(size=20));p1
+
+
+
+
+#Create median horizontal line
+h = median(f$cazyme_diversity_bacteria, na.rm = T)
+
+#Fungi
+p2 <- metadata %>%
+    bind_rows(tibble(var1 = "trt99")) %>% 
+  ggplot(aes(x= Succession, y = cazyme_diversity_bacteria, fill = Succession))+
+  geom_boxplot(aes(fill= Succession),outlier.shape = NA)+
+    geom_point(position=position_jitter(0.1, seed = 123),alpha=0.5)+
+    scale_fill_manual(values=farg, na.translate = F)+
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      ylim(3.25,3.75)+
+      theme_classic()+
+  scale_x_discrete(limits = c("Managed","Recent","Late","trt99","Forest"),
+  breaks = c("Managed","Recent","Late",NA,"Forest"),
+  labels = c("Managed","Recent","Late",NA,"Forest"))+
+  geom_vline(xintercept = "trt99", linetype = 2, linewidth = 0.2)+
+    geom_hline(yintercept = h, linetype = 2, linewidth = 0.9, col = "black")+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+     theme(text=element_text(size=20));p2
+
+#Fig. 3ab
+ggarrange(p1,p2,
+legend = "none")
+
+
+
+
+#Create median horizontal line
+h = median(f$pcyc_diversity_fungi, na.rm = T)
+
+#Fungi
+p1 <- metadata %>%
+    bind_rows(tibble(var1 = "trt99")) %>% 
+  ggplot(aes(x= Succession, y = pcyc_diversity_fungi, fill = Succession))+
+  geom_boxplot(aes(fill= Succession),outlier.shape = NA)+
+    geom_point(position=position_jitter(0.1, seed = 123),alpha=0.5)+
+    scale_fill_manual(values=farg, na.translate = F)+
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      ylim(3,3.45)+
+      theme_classic()+
+  #geom_line(aes(group = Par),alpha = 0.05)+
+  scale_x_discrete(limits = c("Managed","Recent","Late","trt99","Forest"),
+  breaks = c("Managed","Recent","Late",NA,"Forest"),
+  labels = c("Managed","Recent","Late",NA,"Forest"))+
+  geom_vline(xintercept = "trt99", linetype = 2, linewidth = 0.2)+
+    geom_hline(yintercept = h, linetype = 2, linewidth = 0.9, col = "black")+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+  #theme(legend.position = "none")+
+     theme(text=element_text(size=20));p1
+
+
+#Create median horizontal line
+h = median(f$pcyc_diversity_bacteria, na.rm = T)
+
+#Fungi
+p2 <- metadata %>%
+    bind_rows(tibble(var1 = "trt99")) %>% 
+  ggplot(aes(x= Succession, y = pcyc_diversity_bacteria, fill = Succession))+
+  geom_boxplot(aes(fill= Succession),outlier.shape = NA)+
+    geom_point(position=position_jitter(0.1, seed = 123),alpha=0.5)+
+    scale_fill_manual(values=farg, na.translate = F)+
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      ylim(3.95,4.15)+
+      theme_classic()+
+  #geom_line(aes(group = Par),alpha = 0.05)+
+  scale_x_discrete(limits = c("Managed","Recent","Late","trt99","Forest"),
+  breaks = c("Managed","Recent","Late",NA,"Forest"),
+  labels = c("Managed","Recent","Late",NA,"Forest"))+
+  geom_vline(xintercept = "trt99", linetype = 2, linewidth = 0.2)+
+    geom_hline(yintercept = h, linetype = 2, linewidth = 0.9, col = "black")+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+  #theme(legend.position = "none")+
+     theme(text=element_text(size=20));p2
+
+ggarrange(p1,p2,
+legend = "none")
+
+
+
+
+
+#Create median horizontal line
+h = median(f$ncyc_diversity_bacteria, na.rm = T)
+
+#Fungi
+p7 <- metadata %>%
+    bind_rows(tibble(var1 = "trt99")) %>% 
+  ggplot(aes(x= Succession, y = ncyc_diversity_bacteria, fill = Succession))+
+  geom_boxplot(aes(fill= Succession),outlier.shape = NA)+
+    geom_point(position=position_jitter(0.1, seed = 123),alpha=0.5)+
+    scale_fill_manual(values=farg, na.translate = F)+
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      ylim(2,3.4)+
+      theme_classic()+
+  #geom_line(aes(group = Par),alpha = 0.05)+
+  scale_x_discrete(limits = c("Managed","Recent","Late","trt99","Forest"),
+  breaks = c("Managed","Recent","Late",NA,"Forest"),
+  labels = c("Managed","Recent","Late",NA,"Forest"))+
+  geom_vline(xintercept = "trt99", linetype = 2, linewidth = 0.2)+
+    geom_hline(yintercept = h, linetype = 2, linewidth = 0.9, col = "black")+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+  #theme(legend.position = "none")+
+     theme(text=element_text(size=20));p7
+
+
+
+
+                                 # EFFECT SIZE PLOT (Figure 3f-h)
+#############################################################################################
+
+#C-cyc
+p1 = res %>%
+  filter(Function == "C-cyc") %>%
+  ggplot(aes(x= Community, y = Omega2_partial))+
+  geom_pointrange(aes(ymin = CI_low, ymax = CI_high), 
+                  size = 1,linewidth = 1, color = "darkslategray")+
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  theme_classic()+
+  ylim(0,0.7) +
+  theme(text=element_text(size=20)) + 
+  labs(x="", y = "")+
+  theme(aspect.ratio=2)+
+  coord_flip();p1
+
+#Pcyc
+p2 = res %>%
+   filter(Function == "P-cyc") %>%
+  ggplot(aes(x= Community, y = Omega2_partial))+
+  geom_pointrange(aes(ymin = CI_low, ymax = CI_high), 
+                  size = 1,linewidth = 1, color = "darkslategray")+
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  theme_classic()+
+  ylim(0,0.7) +
+  theme(text=element_text(size=20)) + 
+  labs(x="", y = "")+
+  theme(aspect.ratio=2)+
+  coord_flip();p2
+
+#Ncyc
+p3 = res %>%
+   filter(Function == "N-cyc") %>%
+  ggplot(aes(x= Community, y = Omega2_partial))+
+  geom_pointrange(aes(ymin = CI_low, ymax = CI_high), 
+                  size = 1,linewidth = 1, color = "darkslategray")+
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  theme_classic()+
+  ylim(0,0.7) +
+  theme(text=element_text(size=20)) + 
+  labs(x="", y = "")+
+  theme(aspect.ratio=2)+
+  coord_flip();p3
+
+
+
+
+                                 # REGRESSION PLOTS (Figure 3i-m)
+#############################################################################################
+
+
+library(ggnewscale)
+
+#Set order of plotting
+metadata$Ecosystem_type = ordered(metadata$Ecosystem_type, levels = c("Grassland","Forest"))
+
+#Set manual color and shape
+farg = c("#fd8d3c","skyblue2")
+shape = c(16,23)
+
+
+
+
+#Plot 3i
+f2 = metadata %>% 
+  ggplot(aes(x = shannon_fungi, y = cazyme_diversity_fungi, group = Ecosystem_type)) +
+  geom_point(aes(x= shannon_fungi, y = cazyme_diversity_fungi, color = Ecosystem_type, shape = Ecosystem_type, fill = Ecosystem_type),  size = 2.5,
+             alpha = 0.8)+
+  geom_smooth(data=subset(metadata, Ecosystem_type == "Forest"),
+               aes(shannon_fungi,cazyme_diversity_fungi,
+                   color=factor(Ecosystem_type)),
+              method=lm,se=F, fullrange = T,
+              lty = 1, size = 1.6)+
+  scale_color_manual(values = farg, guide = "none")+
+  scale_shape_manual(values = shape, guide = "none")+
+  scale_fill_manual(values = farg, guide = "none")+
+  theme_classic()+
+  labs(y = "", x = "",
+       color = "Land use") +
+ theme(text=element_text(size=20));f2
+
+
+
+#Plot 3j
+b2 = metadata %>% 
+  ggplot(aes(x = shannon_bacteria, y = cazyme_diversity_bacteria, group = Ecosystem_type)) +
+  geom_point(aes(x= shannon_bacteria, y = cazyme_diversity_bacteria, 
+                 color = Ecosystem_type, shape = Ecosystem_type, fill = Ecosystem_type), 
+              size = 2.5, alpha = 0.8)+
+    geom_smooth(data=subset(metadata, Ecosystem_type == "Forest"),
+               aes(shannon_bacteria,cazyme_diversity_bacteria,
+                   color=factor(Ecosystem_type)),
+              method=lm,se=F, fullrange = T,
+              lty = 1, size = 1.6)+
+  scale_color_manual(values = farg, guide = "none")+
+  scale_shape_manual(values = shape, guide = "none")+
+  scale_fill_manual(values = farg, guide = "none")+
+  theme_classic()+
+  labs(y = "", x = "",
+       color = "Land use") +
+ theme(text=element_text(size=20));b2
+
+
+#Plot 3k
+f3 = metadata %>% 
+  ggplot(aes(x = shannon_fungi, y = pcyc_diversity_fungi, group = Ecosystem_type)) +
+  geom_point(aes(x= shannon_fungi, y = pcyc_diversity_fungi, color = Ecosystem_type, shape = Ecosystem_type, fill = Ecosystem_type),  size = 2.5,
+             alpha = 0.8)+
+  scale_color_manual(values = farg, guide = "none")+
+  scale_shape_manual(values = shape, guide = "none")+
+  scale_fill_manual(values = farg, guide = "none")+
+  theme_classic()+
+  labs(y = "", x = "",
+       color = "Land use") +
+ theme(text=element_text(size=20));f3
+
+
+
+#Plot 3l
+b4 = metadata %>% 
+  ggplot(aes(x = shannon_bacteria, y = pcyc_diversity_bacteria, group = Ecosystem_type)) +
+  geom_point(aes(x= shannon_bacteria, y = pcyc_diversity_bacteria, 
+                 color = Ecosystem_type, shape = Ecosystem_type, fill = Ecosystem_type), 
+             size = 2.5, alpha = 0.8)+
+    geom_smooth(data=metadata,
+               aes(shannon_bacteria,pcyc_diversity_bacteria,
+                   color=factor(Ecosystem_type)),
+              method=lm,se=F,  fullrange = T,
+              lty = 1, size = 1.6)+
+  scale_color_manual(values = farg, guide = "none")+
+  scale_shape_manual(values = shape, guide = "none")+
+  scale_fill_manual(values = farg, guide = "none")+
+  theme_classic()+
+  labs(y = "", x = "",
+       color = "Land use") +
+ theme(text=element_text(size=20));b4
+
+ 
+
+#plot 3m
+b3 = metadata %>% 
+  ggplot(aes(x = shannon_bacteria, y = ncyc_diversity_bacteria, group = Ecosystem_type)) +
+  geom_point(aes(x= shannon_bacteria, y = ncyc_diversity_bacteria, 
+                 color = Ecosystem_type, shape = Ecosystem_type, fill = Ecosystem_type), 
+              size = 2.5, alpha = 0.8)+
+    geom_smooth(data=subset(metadata, Ecosystem_type == "Forest"),
+               aes(shannon_bacteria,ncyc_diversity_bacteria,
+                   color=factor(Ecosystem_type)),
+              method=lm,se=F, fullrange = T,
+              lty = 1, size = 1.6)+
+  scale_color_manual(values = farg, guide = "none")+
+  scale_shape_manual(values = shape, guide = "none")+
+  scale_fill_manual(values = farg, guide = "none")+
+  theme_classic()+
+  labs(y = "", x = "",
+       color = "Land use") +
+ theme(text=element_text(size=20));b3
