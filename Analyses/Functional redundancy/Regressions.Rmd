@@ -155,33 +155,7 @@ cor.test(f$shannon_bacteria, f$pcyc_diversity_bacteria, method = "pearson")
 ```
 
 
-```{r}
 
-
-#Test if the correlation coefficients are significantly different by bootstrap tests
-r1 = -0.70 #Correlation coefficient for AG 1900s
-n1 = 17 #n for AG 1960s
-r2 = -0.16 #Correlation coefficient for SNG
-n2 = 38 #n for SNG
-
-cocor.indep.groups(
-  r1,
-  r2,
-  n1,
-  n2,
-  alternative = "two.sided",
-  test = "all",
-  alpha = 0.05,
-  conf.level = 0.95,
-  null.value = 0,
-  data.name = NULL,
-  var.labels = NULL,
-  return.htest = FALSE
-)
-
-#These bootstrap tests are useless!
-
-```
 
 
 
