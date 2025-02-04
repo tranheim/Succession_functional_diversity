@@ -1,0 +1,371 @@
+---
+title: "framework_ver1"
+author: "Tord Ranheim"
+date: "2024-11-14"
+output: html_document
+---
+
+
+A more manual approach based on the supplementary materials found in the Ricotta et al. 2023 paper
+https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.14100
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dev = "png",
+                      dpi=300,
+                      echo=F,
+                      cache=T, echo=T)
+```
+
+
+```{r Load libraries}
+
+library(readr)
+library(tidyverse)
+library(metagMisc)
+library(vegan)
+
+```
+
+
+Clear the directory and set pathway
+```{r}
+rm(list=ls())
+
+```
+
+
+                                        LOAD DATASETS
+###################################################################################################
+
+```{r Load predicted datafiles}
+
+kegg = read_tsv("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Microbial/Picrust2/KO_predicted.tsv")
+
+```
+
+```{r Load raw phyloseq object}
+
+ps_bacteria = readRDS("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Microbial/Amplicon/Soil/16S/Processing/Results/ps_bacteria_srs.RDS")
+
+```
+
+```{r Load metadata file}
+
+metadata = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Metadata/Result/metadata.txt")
+row.names(metadata) = metadata$Sample
+
+```
+
+
+```{r Load mapping files}
+
+carbon = read.csv("/Users/tranheim/Desktop/Databases/Bacteria/Genes/KEGG/Carbon_mapping.csv")
+nitro = read.table("/Users/tranheim/Desktop/Databases/Bacteria/Genes/Ncyc/Custom database/kegg_ncyc.txt")
+phos = read.table("/Users/tranheim/Desktop/Databases/Bacteria/Genes/Pcyc/Pcyc_mapping.csv", sep = ";", header = T)
+
+```
+
+
+                                        PROCESS KEGG 
+###################################################################################################
+
+```{r Subset OTU}
+
+df = kegg %>% as.data.frame
+row.names(df) = df$sequence
+df$sequence <- NULL
+
+n = taxa_names(ps_bacteria)
+
+df = df[n,]
+```
+
+
+```{r Create subset of kegg predicted based on pathway}
+
+kegg_c = df[carbon$KO]
+kegg_n = df[nitro$KO]
+
+n=phos$KO
+n2 = names(kegg)
+k = intersect(n,n2)
+kegg_p = df[k]
+
+rm(n,n2,k, nitro,phos,carbon, kegg)
+
+```
+
+
+```{r Remove empty columns and rows}
+
+kegg_c <- kegg_c[which(rowSums(kegg_c)>0),]
+kegg_c <- kegg_c[which(colSums(kegg_c)>0)]
+
+kegg_n <- kegg_n[which(rowSums(kegg_n)>0),]
+kegg_n <- kegg_n[which(colSums(kegg_n)>0)]
+
+kegg_p <- kegg_p[which(rowSums(kegg_p)>0),]
+kegg_p <- kegg_p[which(colSums(kegg_p)>0)]
+
+```
+
+
+
+
+                                        PROCESS BEFORE ANALYSES
+###################################################################################################
+All trait data were linearly scaled in the range [0,1] by their minimum and maximum values.
+```{r Scale values}
+library(scales)
+
+c_scale = apply(kegg_c,2,rescale) %>% as.data.frame()
+n_scale = apply(kegg_n,2,rescale) %>% as.data.frame()
+p_scale = apply(kegg_p,2,rescale) %>% as.data.frame()
+
+```
+
+
+Subset taxa by land use
+```{r Subset taxa by land use}
+
+ps_split = ps_bacteria %>% phyloseq_sep_variable("Succession")
+n1 = taxa_names(ps_split[["Managed"]])
+n2 = taxa_names(ps_split[["Recent"]])
+n3 = taxa_names(ps_split[["Late"]])
+n4 = taxa_names(ps_split[["Forest"]])
+
+```
+
+
+```{r Extract relative abundances of otus for each land use}
+
+ps_m = ps_split[["Managed"]] %>% microbiome::transform("compositional")
+m1 = as.data.frame(as.matrix(ps_m@otu_table)) %>% t()
+
+ps_r = ps_split[["Recent"]] %>% microbiome::transform("compositional")
+m2 = as.data.frame(as.matrix(ps_r@otu_table)) %>% t()
+
+ps_l = ps_split[["Late"]] %>% microbiome::transform("compositional")
+m3 = as.data.frame(as.matrix(ps_l@otu_table)) %>% t()
+
+ps_f = ps_split[["Forest"]] %>% microbiome::transform("compositional")
+m4 = as.data.frame(as.matrix(ps_f@otu_table)) %>% t()
+
+rm(ps_m,ps_r,ps_l,ps_f)
+```
+
+
+From the scaled values, the functional Euclidean distances between all pairs of species in both treatments were calculated.
+```{r Calculate functional distances - Carbon}
+
+#Managed
+k1 = c_scale %>% filter(row.names(c_scale) %in% n1)
+k1 = k1 %>% vegdist("euclidean") #Calculate functional euclidean distances
+k1 = k1/max(k1) #divide distances by their maximum value
+z1 = m1[,labels(k1)] #Match OTU names
+
+#Recent
+k2 = c_scale %>% filter(row.names(c_scale) %in% n2)
+k2 = k2 %>% vegdist("euclidean") 
+k2 = k2/max(k2) 
+z2 = m2[,labels(k2)]
+
+#Late
+k3 = c_scale %>% filter(row.names(c_scale) %in% n3)
+k3 = k3 %>% vegdist("euclidean") 
+k3 = k3/max(k3) 
+z3 = m3[,labels(k3)]
+
+#Forest
+k4 = c_scale %>% filter(row.names(c_scale) %in% n4)
+k4 = k4 %>% vegdist("euclidean") 
+k4 = k4/max(k4) 
+z4 = m4[,labels(k4)]
+
+#Calculate DRQ
+#Managed
+r1 = adiv::speciesdiv(z1) %>% as.data.frame()
+r2 = adiv::QE(z1,k1, scale = F)
+d1 = r2
+colnames(d1) = "Q"
+d1$D = 1-r1$GiniSimpson
+d1$R = (r1$GiniSimpson-d1$Q)
+
+#Early
+r1 = adiv::speciesdiv(z2) %>% as.data.frame()
+r2 = adiv::QE(z2,k2, scale = F)
+d2 = r2
+colnames(d2) = "Q"
+d2$D = 1-r1$GiniSimpson
+d2$R = (r1$GiniSimpson-d2$Q)
+
+#Late
+r1 = adiv::speciesdiv(z3) %>% as.data.frame()
+r2 = adiv::QE(z3,k3, scale = F)
+d3 = r2
+colnames(d3) = "Q"
+d3$D = 1-r1$GiniSimpson
+d3$R = (r1$GiniSimpson-d3$Q)
+
+
+#Forest
+r1 = adiv::speciesdiv(z4) %>% as.data.frame()
+r2 = adiv::QE(z4,k4, scale = F)
+d4 = r2
+colnames(d4) = "Q"
+d4$D = 1-r1$GiniSimpson
+d4$R = (r1$GiniSimpson-d4$Q)
+
+#Merge to new dataframe
+f1 = rbind(d1,d2,d3,d4)
+f1$Sample = row.names(f1)
+f1$Element = "Carbon"
+
+```
+
+
+```{r Calculate functional distances - Nitrogen}
+
+#Managed
+k1 = n_scale %>% filter(row.names(n_scale) %in% n1)
+k1 = k1 %>% vegdist("euclidean") #Calculate functional euclidean distances
+k1 = k1/max(k1) #divide distances by their maximum value
+z1 = m1[,labels(k1)] #Match OTU names
+
+#Recent
+k2 = n_scale %>% filter(row.names(n_scale) %in% n2)
+k2 = k2 %>% vegdist("euclidean") 
+k2 = k2/max(k2) 
+z2 = m2[,labels(k2)]
+
+#Late
+k3 = n_scale %>% filter(row.names(n_scale) %in% n3)
+k3 = k3 %>% vegdist("euclidean") 
+k3 = k3/max(k3) 
+z3 = m3[,labels(k3)]
+
+#Forest
+k4 = n_scale %>% filter(row.names(n_scale) %in% n4)
+k4 = k4 %>% vegdist("euclidean") 
+k4 = k4/max(k4) 
+z4 = m4[,labels(k4)]
+
+#Calculate DRQ
+#Managed
+r1 = adiv::speciesdiv(z1) %>% as.data.frame()
+r2 = adiv::QE(z1,k1, scale = F)
+d1 = r2
+colnames(d1) = "Q"
+d1$D = 1-r1$GiniSimpson
+d1$R = (r1$GiniSimpson-d1$Q)
+
+#Early
+r1 = adiv::speciesdiv(z2) %>% as.data.frame()
+r2 = adiv::QE(z2,k2, scale = F)
+d2 = r2
+colnames(d2) = "Q"
+d2$D = 1-r1$GiniSimpson
+d2$R = (r1$GiniSimpson-d2$Q)
+
+#Late
+r1 = adiv::speciesdiv(z3) %>% as.data.frame()
+r2 = adiv::QE(z3,k3, scale = F)
+d3 = r2
+colnames(d3) = "Q"
+d3$D = 1-r1$GiniSimpson
+d3$R = (r1$GiniSimpson-d3$Q)
+
+
+#Forest
+r1 = adiv::speciesdiv(z4) %>% as.data.frame()
+r2 = adiv::QE(z4,k4, scale = F)
+d4 = r2
+colnames(d4) = "Q"
+d4$D = 1-r1$GiniSimpson
+d4$R = (r1$GiniSimpson-d4$Q)
+
+#Merge to new dataframe
+f2 = rbind(d1,d2,d3,d4)
+f2$Sample = row.names(f2)
+f2$Element = "Nitrogen"
+
+```
+
+
+```{r Calculate functional distances - Phosphorus}
+
+#Managed
+k1 = p_scale %>% filter(row.names(p_scale) %in% n1)
+k1 = k1 %>% vegdist("euclidean") #Calculate functional euclidean distances
+k1 = k1/max(k1) #divide distances by their maximum value
+z1 = m1[,labels(k1)] #Match OTU names
+
+#Recent
+k2 = p_scale %>% filter(row.names(p_scale) %in% n2)
+k2 = k2 %>% vegdist("euclidean") 
+k2 = k2/max(k2) 
+z2 = m2[,labels(k2)]
+
+#Late
+k3 = p_scale %>% filter(row.names(p_scale) %in% n3)
+k3 = k3 %>% vegdist("euclidean") 
+k3 = k3/max(k3) 
+z3 = m3[,labels(k3)]
+
+#Forest
+k4 = p_scale %>% filter(row.names(p_scale) %in% n4)
+k4 = k4 %>% vegdist("euclidean") 
+k4 = k4/max(k4) 
+z4 = m4[,labels(k4)]
+
+#Calculate DRQ
+#Managed
+r1 = adiv::speciesdiv(z1) %>% as.data.frame()
+r2 = adiv::QE(z1,k1, scale = F)
+d1 = r2
+colnames(d1) = "Q"
+d1$D = 1-r1$GiniSimpson
+d1$R = (r1$GiniSimpson-d1$Q)
+
+#Early
+r1 = adiv::speciesdiv(z2) %>% as.data.frame()
+r2 = adiv::QE(z2,k2, scale = F)
+d2 = r2
+colnames(d2) = "Q"
+d2$D = 1-r1$GiniSimpson
+d2$R = (r1$GiniSimpson-d2$Q)
+
+#Late
+r1 = adiv::speciesdiv(z3) %>% as.data.frame()
+r2 = adiv::QE(z3,k3, scale = F)
+d3 = r2
+colnames(d3) = "Q"
+d3$D = 1-r1$GiniSimpson
+d3$R = (r1$GiniSimpson-d3$Q)
+
+
+#Forest
+r1 = adiv::speciesdiv(z4) %>% as.data.frame()
+r2 = adiv::QE(z4,k4, scale = F)
+d4 = r2
+colnames(d4) = "Q"
+d4$D = 1-r1$GiniSimpson
+d4$R = (r1$GiniSimpson-d4$Q)
+
+#Merge to new dataframe
+f3 = rbind(d1,d2,d3,d4)
+f3$Sample = row.names(f3)
+f3$Element = "Phosphorus"
+
+```
+
+
+```{r Merge and write results}
+
+res = rbind(f1,f2,f3)
+
+write.table(res, file = "res_qrd.txt")
+
+```
+
