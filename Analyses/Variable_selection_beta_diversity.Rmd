@@ -1,0 +1,174 @@
+---
+title: "Variable_selection_ver1"
+author: "Tord Ranheim"
+date: "2024-10-28"
+output:
+  html_document:
+    keep_md: no
+---
+
+
+Variable selection of microbial community composition using rfPermute on first PCoA of fungi and bacteria
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dev = "png",
+                      dpi=300,
+                      echo=F,
+                      cache=T, echo=T)
+```
+
+
+```{r Load libraries}
+library(tidyverse)
+library(rmarkdown)
+library(knitr)
+library(magrittr)
+library(phyloseq)
+library(microViz)
+library(rfPermute)
+```
+
+
+
+```{r Clear directory and set seed}
+rm(list=ls())
+set.seed(123)
+```
+
+
+Data loading
+```{r Load data}
+
+#Load metadata
+metadata = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Metadata/Result/metadata.txt")
+row.names(metadata) = metadata$Sample
+
+#Load alpha diversity results
+pcoa_results = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Beta diversity/Results/res_pcoa.txt")
+
+```
+
+
+```{r Load environmental variables}
+
+env_omit = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Metadata/Partitioning/Results/env_omit.txt")
+
+env_imputed = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Metadata/Partitioning/Results/env_imputed.txt")
+
+```
+
+
+                                      PREPARE DATASET
+###################################################################################################
+
+```{r prepare datasets}
+
+#Dataset with omitted variables
+df_omit = env_omit
+df_omit$Sample = row.names(env_omit)
+df_omit = left_join(df_omit,pcoa_results)
+
+#Dataset with imputed values
+df_impute = env_imputed
+df_impute$Sample = row.names(env_imputed)
+df_impute = left_join(df_impute, pcoa_results)
+
+rm(env_omit, env_imputed)
+```
+
+
+                                       RANDOM FOREST
+###################################################################################################
+file:///Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/rfPermute/rfPermute_Tutorial.html
+
+```{r PCoA1 fungi}
+
+#Imputed values
+t1 = df_impute[,c(1:11,15)] 
+t1 = na.omit(t1)
+  
+rp1 <- rfPermute(PCoA1_fungi ~ ., t1, ntree = 1000, num.rep = 1000, num.cores = 10)
+
+plotImportance(rp1)
+round(rfPermute::importance(rp1), 3)
+
+#With omitted values
+t1 = df_omit[,c(1:11,15)] 
+t1 = na.omit(t1)
+  
+rp2 <- rfPermute(PCoA1_fungi ~ ., t1, ntree = 1000, num.rep = 1000, num.cores = 10)
+
+plotImportance(rp2)
+round(rfPermute::importance(rp2), 3)
+
+```
+
+
+
+```{r Process results fungi}
+
+df = data.frame(round(rfPermute::importance(rp1), 3))
+df$Variable = row.names(df)
+df$Method = "Imputed"
+df2 = data.frame(round(rfPermute::importance(rp2), 3))
+df2$Variable = row.names(df2)
+df2$Method = "Omitted"
+
+res_fungi = rbind(df,df2)
+
+```
+
+
+
+```{r PCoA1 bacteria}
+
+#Imputed values
+t1 = df_impute[,c(1:11,13)] 
+t1 = na.omit(t1)
+  
+rp1 <- rfPermute(PCoA1_bacteria ~ ., t1, ntree = 1000, num.rep = 1000, num.cores = 10)
+
+plotImportance(rp1)
+round(rfPermute::importance(rp1), 3)
+
+#With omitted values
+t1 = df_omit[,c(1:11,13)] 
+t1 = na.omit(t1)
+  
+rp2 <- rfPermute(PCoA1_bacteria ~ ., t1, ntree = 1000, num.rep = 1000, num.cores = 10)
+
+plotImportance(rp2)
+round(rfPermute::importance(rp2), 3)
+
+```
+
+
+```{r Process results bacteria}
+
+df = data.frame(round(rfPermute::importance(rp1), 3))
+df$Variable = row.names(df)
+df$Method = "Imputed"
+df2 = data.frame(round(rfPermute::importance(rp2), 3))
+df2$Variable = row.names(df2)
+df2$Method = "Omitted"
+
+res_bacteria = rbind(df,df2)
+
+```
+
+
+
+```{r Merge and write results}
+
+res_fungi$Community = "Fungi"
+res_bacteria$Community = "Bacteria"
+
+res = rbind(res_fungi,res_bacteria)
+
+write.table(res, file = "results_variable_selection_pcoa.txt")
+
+```
+
+
+
