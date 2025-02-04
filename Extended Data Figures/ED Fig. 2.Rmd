@@ -1,0 +1,176 @@
+---
+title: "ED Fig. 2"
+author: "Tord Ranheim"
+date: '2024-12-14'
+output:
+  html_document:
+    keep_md: no
+---
+
+
+Code to reproduce the Extended Data Fig. 2
+
+NB! The figure has been manually compiled in pages
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dev = "png",
+                      dpi=300,
+                      echo=F,
+                      cache=T, echo=T)
+```
+
+
+```{r}
+rm(list=ls())
+```
+
+
+Libraries
+```{r}
+library(dplyr)
+library(vegan)
+library(tidyr)
+library(ggplot2)
+library(ggpubr)
+```
+
+
+
+Data loading
+
+```{r Load vs results}
+
+vs_fd = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Functional diversity/Variable selection/Results/results_variable_selection_fd.txt")
+
+```
+
+
+                                        SET PLOT DETAILS
+#############################################################################################
+
+```{r Set plot details}
+
+#fix names
+names(vs_fd) = c("IncMSE","p.value","IncNodePurity","IncNodePurity.pvalue",
+                 "Community", "Function","Variable")
+
+names(vs_fc) = c("IncMSE","p.value","IncNodePurity","IncNodePurity.pvalue",
+                 "Community", "Function","Variable")
+
+
+#Add factor for p-value cutoff
+vs_fd$Sign = ifelse(vs_fd$p.value > 0.05, "not sign", "sign")
+vs_fc$Sign = ifelse(vs_fc$p.value > 0.05, "not sign", "sign")
+
+
+#Set manual colors for p-value cutoff
+pval = c("grey60","red4")
+
+```
+
+
+```{r Order names}
+
+vs_fd$Function[vs_fd$Function == "CAZyme"] <- "C-cyc" 
+vs_fd$Function[vs_fd$Function == "Pcyc"] <- "P-cyc" 
+vs_fd$Function[vs_fd$Function == "Ncyc"] <- "N-cyc" 
+
+vs_fc$Function[vs_fc$Function == "CAZyme"] <- "C-cyc" 
+vs_fc$Function[vs_fc$Function == "Pcyc"] <- "P-cyc" 
+vs_fc$Function[vs_fc$Function == "Ncyc"] <- "N-cyc" 
+
+```
+
+
+                                    EXTENDED DATA FIG. 2
+#############################################################################################
+
+```{r ED Fig. 2}
+
+#C-cyc fungi
+cf = vs_fd %>% 
+  filter(Function == "C-cyc") %>%
+  filter(Community == "Fungi") %>%
+ggplot(aes(x = reorder(Variable, IncMSE), IncMSE)) +
+  geom_bar(stat = "identity", aes(fill = Sign)) +
+  scale_fill_manual(values = pval)+
+  facet_wrap(~Function) +
+  coord_flip() +
+  theme_bw()+
+   # theme(text=element_text(size=16)) +
+   guides(fill="none") + 
+    labs(x = "Explanatory variable", y = "IncMSE (%)");cf
+
+
+#CAZyme bacteria
+cb = vs_fd %>% 
+  filter(Function == "C-cyc") %>%
+  filter(Community == "Bacteria") %>%
+ggplot(aes(x = reorder(Variable, IncMSE), IncMSE)) +
+  geom_bar(stat = "identity", aes(fill = Sign)) +
+  scale_fill_manual(values = pval)+
+  facet_wrap(~Function) +
+  coord_flip() +
+  theme_bw()+
+   # theme(text=element_text(size=16)) +
+   guides(fill="none") + 
+    labs(x = "", y = "IncMSE (%)");cb
+
+
+#Pcyc fungi
+pf = vs_fd %>% 
+  filter(Function == "P-cyc") %>%
+  filter(Community == "Fungi") %>%
+ggplot(aes(x = reorder(Variable, IncMSE), IncMSE)) +
+  geom_bar(stat = "identity", aes(fill = Sign)) +
+  scale_fill_manual(values = pval)+
+  facet_wrap(~Function) +
+  coord_flip() +
+  theme_bw()+
+   # theme(text=element_text(size=16)) +
+   guides(fill="none") + 
+    labs(x = "Explanatory variable", y = "IncMSE (%)");pf
+
+
+#Pcyc bacteria
+pb = vs_fd %>% 
+  filter(Function == "P-cyc") %>%
+  filter(Community == "Bacteria") %>%
+ggplot(aes(x = reorder(Variable, IncMSE), IncMSE)) +
+  geom_bar(stat = "identity", aes(fill = Sign)) +
+  scale_fill_manual(values = pval)+
+  facet_wrap(~Function) +
+  coord_flip() +
+  theme_bw()+
+   # theme(text=element_text(size=16)) +
+   guides(fill="none") + 
+    labs(x = "", y = "IncMSE (%)");pb
+
+
+#Ncyc bacteria
+nb = vs_fd %>% 
+  filter(Function == "N-cyc") %>%
+  filter(Community == "Bacteria") %>%
+ggplot(aes(x = reorder(Variable, IncMSE), IncMSE)) +
+  geom_bar(stat = "identity", aes(fill = Sign)) +
+  scale_fill_manual(values = pval)+
+  facet_wrap(~Function) +
+  coord_flip() +
+  theme_bw()+
+   # theme(text=element_text(size=16)) +
+   guides(fill="none") + 
+    labs(x = "Explanatory variable", y = "IncMSE (%)");nb
+
+
+```
+
+
+```{r ED Fig. 2a-d}
+
+#Combine to one figure
+ggarrange(cf, cb, pf, pb,
+          ncol = 2, nrow = 2)
+
+```
+
