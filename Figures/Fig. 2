@@ -1,0 +1,295 @@
+Code to reproduce panels in manuscript figure 2
+
+NB! The figure has been manually compiled in pages
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dev = "png",
+                      dpi=300,
+                      echo=F,
+                      cache=T, echo=T)
+```
+
+
+```{r}
+rm(list=ls())
+```
+
+
+Libraries
+```{r}
+library(dplyr)
+library(vegan)
+library(tidyr)
+library(ggplot2)
+library(ggpubr)
+```
+
+
+Data loading
+```{r Load data}
+
+#Load metadata
+metadata = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Metadata/Result/metadata.txt")
+row.names(metadata) = metadata$Sample
+
+```
+
+```{r Load ad results}
+
+#Load alpha diversity results
+ad_results = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Alpha diversity/Results/alpha_diversity.txt")
+
+```
+
+
+```{r Load srs-transformed phyloseq objects}
+
+#Soil fungi
+ps_fungi = readRDS("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Microbial/Amplicon/Soil/ITS/Processing/Results/ps_fungi_srs.RDS")
+
+#Soil bacteria
+ps_bacteria = readRDS("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Microbial/Amplicon/Soil/16S/Processing/Results/ps_bacteria_srs.RDS")
+
+```
+
+```{r Load effect size results}
+
+es_alpha = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Alpha diversity/Results/es_alpha_diversity.txt")
+
+es_beta = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Beta diversity/Results/es_permanova.txt")
+  
+```
+
+
+
+                                         PREPARE DATASET
+#############################################################################################
+
+```{r prepare for alpha diversity plots}
+
+metadata = left_join(metadata,ad_results)
+
+```
+
+```{r prepare for effect size plot}
+
+es_beta = es_beta[c(1,4),]
+
+es_alpha$Diversity = "Alpha"
+es_beta$Diversity = "Beta"
+
+s1 = es_alpha %>% dplyr::select(Community, Omega2_partial, CI_low, CI_high, Diversity)
+s2 = es_beta %>% dplyr::select(Community, parOmegaSq, Diversity)
+names(s2) <- c("Community","Omega2_partial","Diversity")
+s2$CI_low = NA
+s2$CI_high = NA
+s2 = s2[,c(1:2,4:5,3)]
+es = rbind(s1,s2)
+
+```
+
+                                        SET PLOT DETAILS
+#############################################################################################
+
+```{r Set plotting details}
+
+#Set order of plotting
+metadata$Succession = ordered(metadata$Succession, levels = c("Managed","Recent","Late","Forest"))
+
+#Set manual color and shape
+farg = c("#bd0026","#fd8d3c","#fecc5c", "skyblue2")
+shape = c(21,23,24,25)
+farg2 = "grey59"
+
+#Create median line for forest reference stage
+f = metadata %>% filter(Succession == "Forest") 
+
+```
+
+
+
+                          ALPHA DIVERSITY PLOTS (Figure 2a-b)
+#############################################################################################
+```{r Plot alpa diversity fungi}
+
+#Create median horizontal line
+h = median(f$shannon_fungi, na.rm = T)
+
+#Fungi
+p1 <- metadata %>%
+    bind_rows(tibble(var1 = "trt99")) %>% 
+  ggplot(aes(x= Succession, y = shannon_fungi, fill = Succession))+
+  geom_boxplot(aes(fill= Succession),outlier.shape = NA)+
+    geom_point(position=position_jitter(0.1, seed = 123),alpha=0.5)+
+    scale_fill_manual(values=farg, na.translate = F)+
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      ylim(1,6)+
+      theme_classic()+
+  #geom_line(aes(group = Par),alpha = 0.05)+
+  scale_x_discrete(limits = c("Managed","Recent","Late","trt99","Forest"),
+  breaks = c("Managed","Recent","Late",NA,"Forest"),
+  labels = c("Managed","Recent","Late",NA,"Forest"))+
+  geom_vline(xintercept = "trt99", linetype = 2, linewidth = 0.2)+
+    geom_hline(yintercept = h, linetype = 2, linewidth = 0.9, col = "black")+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+  #theme(legend.position = "none")+
+     theme(text=element_text(size=20));p1
+
+```
+
+
+```{r Plot alpa diversity bacteria}
+
+#Create median horizontal line
+h = median(f$shannon_bacteria, na.rm = T)
+
+#Fungi
+p2 <- metadata %>%
+    bind_rows(tibble(var1 = "trt99")) %>% 
+  ggplot(aes(x= Succession, y = shannon_bacteria, fill = Succession))+
+  geom_boxplot(aes(fill= Succession),outlier.shape = NA)+
+    geom_point(position=position_jitter(0.1, seed = 123),alpha=0.5)+
+    scale_fill_manual(values=farg, na.translate = F)+
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      ylim(3,7.5)+
+      theme_classic()+
+  #geom_line(aes(group = Par),alpha = 0.05)+
+  scale_x_discrete(limits = c("Managed","Recent","Late","trt99","Forest"),
+  breaks = c("Managed","Recent","Late",NA,"Forest"),
+  labels = c("Managed","Recent","Late",NA,"Forest"))+
+  geom_vline(xintercept = "trt99", linetype = 2, linewidth = 0.2)+
+    geom_hline(yintercept = h, linetype = 2, linewidth = 0.9, col = "black")+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+  #theme(legend.position = "none")+
+     theme(text=element_text(size=20));p2
+
+
+```
+
+
+```{r Combine plots}
+
+ggarrange(p1,p2,
+          common.legend = T,
+          legend = "bottom")
+
+ggarrange(p1,p2,
+legend = "none")
+```
+
+
+
+                          BETA DIVERSITY PLOTS (Figure 2c-d)
+#############################################################################################
+
+```{r PCoA fungi}
+
+z1 = ps_fungi %>% 
+   phyloseq::distance(method = "bray")
+
+k1 <- wcmdscale(d = z1, eig = TRUE)
+scores = data.frame(k1$points[,1:2])
+scores$Dim1 = scores$Dim1*-1
+scores$Succession = factor(ps_fungi@sam_data$Succession)
+scores$Succession = ordered(scores$Succession, levels = levels)
+
+p1 = scores %>% 
+  ggplot(aes(x = Dim1, y = Dim2,
+  color= Succession, shape = Succession, fill = Succession))+
+  geom_point(size = 2) +
+ scale_color_manual(values=farg)+
+  scale_shape_manual(values=shape)+
+  theme(legend.key.size = unit(.5, "cm"))+
+   stat_ellipse(geom = "polygon",
+  aes(fill=Succession), alpha = 0.2, size = 0) +
+  scale_fill_manual(values=farg)+
+  theme_classic()+
+  labs(fill="Land use",color="Land use", shape = "Land use")+
+  guides(fill = guide_legend(override.aes = list(alpha = 0.8)))+
+  theme(text=element_text(size=17));p1
+  
+```
+
+
+```{r PCoA bacteria}
+
+z1 = ps_bacteria %>% 
+   phyloseq::distance(method = "bray")
+
+k1 <- wcmdscale(d = z1, eig = TRUE)
+scores = data.frame(k1$points[,1:2])
+scores$Dim1 = scores$Dim1*-1
+scores$Succession = factor(ps_bacteria@sam_data$Succession)
+scores$Succession = ordered(scores$Succession, levels = levels)
+
+p2 = scores %>% 
+  ggplot(aes(x = Dim1, y = Dim2,
+  color= Succession, shape = Succession, fill = Succession))+
+  geom_point(size = 2) +
+ scale_color_manual(values=farg)+
+  scale_shape_manual(values=shape)+
+  theme(legend.key.size = unit(.5, "cm"))+
+   stat_ellipse(geom = "polygon",
+  aes(fill=Succession), alpha = 0.2, size = 0) +
+  scale_fill_manual(values=farg)+
+  theme_classic()+
+  labs(fill="Land use",color="Land use", shape = "Land use")+
+  guides(fill = guide_legend(override.aes = list(alpha = 0.8)))+
+  theme(text=element_text(size=17));p2
+
+```
+
+
+```{r Combine plots}
+
+ggarrange(p1,p2,
+          common.legend = T,
+          legend = "right")
+
+
+```
+
+
+                                  EFFECT SIZE PLOT (Figure 2e)
+#############################################################################################
+
+```{r effect size plots}
+
+#Alpha diversity
+p1 = es %>%
+  filter(Diversity == "Alpha") %>%
+  ggplot(aes(x= Community, y = Omega2_partial))+
+  geom_pointrange(aes(ymin = CI_low, ymax = CI_high), 
+                  size = 1,linewidth = 1, color = "darkslategray")+
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  theme_classic()+
+  ylim(0,0.6) +
+  theme(text=element_text(size=20)) + 
+  labs(x="", y = "")+
+  theme(aspect.ratio=2)+
+  coord_flip();p1
+
+#Beta diversity
+p2 = es %>%
+  filter(Diversity == "Beta") %>%
+  ggplot(aes(x= Community, y = Omega2_partial))+
+  geom_pointrange(aes(ymin = CI_low, ymax = CI_high), 
+                  size = 1,linewidth = 1, color = "darkslategray")+
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  theme_classic()+
+  ylim(0,0.6) +
+  theme(text=element_text(size=20)) + 
+  labs(x="", y = "")+
+  theme(aspect.ratio=2)+
+  coord_flip();p2
+
+```
