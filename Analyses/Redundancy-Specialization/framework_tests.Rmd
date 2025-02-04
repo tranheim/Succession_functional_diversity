@@ -1,0 +1,315 @@
+---
+title: "test_ver1"
+author: "Tord Ranheim"
+date: "2024-11-16"
+output: html_document
+---
+
+Test RDQ + uniqueness
+GLM + Permanova
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dev = "png",
+                      dpi=300,
+                      echo=F,
+                      cache=T, echo=T)
+```
+
+
+
+Clear the directory 
+```{r}
+
+rm(list=ls())
+
+```
+
+
+Libraries
+```{r}
+library(tidyverse)
+library(dplyr)
+library(rmarkdown)
+library(knitr)
+library(ggplot2)
+library(ggpubr)
+library(dplyr)
+library(phyloseq)
+```
+
+
+                                        LOAD DATASETS
+###################################################################################################
+
+```{r Load metadata file}
+
+metadata = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Metadata/Result/metadata.txt")
+row.names(metadata) = metadata$Sample
+
+```
+
+```{r Load Q R D results}
+
+qrd = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Functional redundancy/Framework/Results/res_qrd.txt")
+
+```
+
+```{r merge}
+
+master = left_join(qrd, metadata)
+res = master %>% dplyr::select(Sample, Succession, Element, Q, R, D, pH, LDMC, C.N, Ecosystem_type, Parent_material, Par, Distance)
+
+rm(qrd, master)
+```
+
+
+```{r Add uniqueness}
+
+res$U = res$D + res$Q
+
+```
+
+
+                                          GLMM
+###################################################################################################
+```{r Load libraries needed for LMMs}
+library(caret)
+library(DHARMa)
+library(jtools)
+library (multcomp)
+library(lme4)
+library(betareg)
+library(glmmTMB)
+
+```
+
+```{r Prepare dataframe}
+
+#Set forest as reference level
+res2 = res
+res2$Succession <- as.factor(res2$Succession) #Set successional stage as factor
+res2$Succession <- relevel(res2$Succession, ref="Forest") #Set forest as reference level
+
+```
+
+
+
+```{r Carbon redundancy}
+
+#Check data distribution
+hist(subset(res2, Element == "Carbon")$R, xlab = "Response", main = "")
+shapiro.test(subset(res2, Element == "Carbon")$R) #Data is skewed: use GLMMs
+
+#Test for differences in grasslands relative to forest reference level
+mod1 <- lmer(Q ~ Succession + (1|Par) + (1|Parent_material) + (1|Distance),
+             data = subset(res2, Element == "Carbon"))
+
+#Check model disagnostics
+resid <- simulateResiduals(fittedModel = mod1, plot = F)
+plot(resid) #QQ-plot looks ok, residual plot shows some deviations but not much
+
+#Inspect results
+summ(mod1, exp = T)
+
+#Now we test for differences between grassland successional stages using the same models but without forests as reference levels
+mod1 <- lmer(Q ~ Succession +  (1|Par) + (1|Parent_material) + (1|Distance),
+             data = subset(res2, Element == "Carbon"))
+summ(mod1, exp = T)
+
+#This is followed bymultiple comparisons between all stages
+summary(glht(mod1, mcp(Succession  = "Tukey")))
+#No differences between any of the grassland successional stages 
+
+```
+
+```{r Carbon uniqueness}
+
+#Check data distribution
+hist(subset(res2, Element == "Carbon")$U, xlab = "Response", main = "")
+shapiro.test(subset(res2, Element == "Carbon")$U) #Data is skewed: use GLMMs
+
+#Test for differences in grasslands relative to forest reference level
+mod1 <- lmer(U ~ Succession + (1|Par) + (1|Parent_material) + (1|Distance),
+             data = subset(res2, Element == "Carbon"))
+
+#Check model disagnostics
+resid <- simulateResiduals(fittedModel = mod1, plot = F)
+plot(resid) #QQ-plot looks ok, residual plot shows some deviations but not much
+
+#Inspect results
+summ(mod1, exp = T)
+
+#Now we test for differences between grassland successional stages using the same models but without forests as reference levels
+mod1 <- lmer(U ~ Succession +  (1|Par) + (1|Parent_material) + (1|Distance),
+             data = subset(res2, Element == "Carbon"))
+summ(mod1, exp = T)
+
+#This is followed bymultiple comparisons between all stages
+summary(glht(mod1, mcp(Succession  = "Tukey")))
+#No differences between any of the grassland successional stages 
+
+```
+
+```{r P redundancy}
+
+#Check data distribution
+hist(subset(res2, Element == "Phosphorus")$R, xlab = "Response", main = "")
+shapiro.test(subset(res2, Element == "Phosphorus")$R) #Data is skewed: use GLMMs
+
+#Test for differences in grasslands relative to forest reference level
+mod1 <- glmer(Q ~ Succession + (1|Par) + (1|Parent_material) + (1|Distance),
+              family = gaussian(link = "identity"), 
+             data = subset(res2, Element == "Phosphorus"))
+
+
+#Check model disagnostics
+resid <- simulateResiduals(fittedModel = mod1, plot = F)
+plot(resid) #QQ-plot looks ok
+
+#Inspect results
+summ(mod1, exp = T)
+summary(mod1)
+
+#Now we test for differences between grassland successional stages using the same models but without forests as reference levels
+mod1 <- glmer(Q ~ Succession +  (1|Par) + (1|Parent_material) + (1|Distance),
+               family = gaussian(link = "identity"),
+             data = subset(res2, Element == "Phosphorus"))
+summ(mod1, exp = T)
+
+#This is followed bymultiple comparisons between all stages
+summary(glht(mod1, mcp(Succession  = "Tukey")))
+
+```
+
+```{r P uniqueness}
+
+#Check data distribution
+hist(subset(res2, Element == "Phosphorus")$U, xlab = "Response", main = "")
+shapiro.test(subset(res2, Element == "Phosphorus")$U) #Data is skewed: use GLMMs
+
+#Test for differences in grasslands relative to forest reference level
+mod1 <- glmer(U ~ Succession + (1|Par) + (1|Parent_material) + (1|Distance),
+              family = gaussian(link = "identity"), 
+             data = subset(res2, Element == "Phosphorus"))
+
+#Check model disagnostics
+resid <- simulateResiduals(fittedModel = mod1, plot = F)
+plot(resid) #QQ-plot looks ok
+
+#Inspect results
+summ(mod1, exp = T)
+
+#Now we test for differences between grassland successional stages using the same models but without forests as reference levels
+mod1 <- glmer(U ~ Succession +  (1|Par) + (1|Parent_material) + (1|Distance),
+               family = gaussian(link = "identity"),
+             data = subset(res2, Element == "Phosphorus"))
+
+#This is followed bymultiple comparisons between all stages
+summary(glht(mod1, mcp(Succession  = "Tukey")))
+
+```
+```{r N redundancy}
+
+#Check data distribution
+hist(subset(res2, Element == "Nitrogen")$R, xlab = "Response", main = "")
+
+#Test for differences in grasslands relative to forest reference level
+mod1 <- glmer(Q ~ Succession + (1|Par) + (1|Parent_material) + (1|Distance),
+              family = gaussian(link = "identity"), 
+             data = subset(res2, Element == "Nitrogen"))
+
+
+#Check model disagnostics
+resid <- simulateResiduals(fittedModel = mod1, plot = F)
+plot(resid) #QQ-plot looks ok
+
+#Inspect results
+summ(mod1, exp = T)
+
+#Now we test for differences between grassland successional stages using the same models but without forests as reference levels
+mod1 <- glmer(Q ~ Succession +  (1|Par) + (1|Parent_material) + (1|Distance),
+               family = gaussian(link = "identity"),
+             data = subset(res2, Element == "Nitrogen"))
+summ(mod1, exp = T)
+
+#This is followed bymultiple comparisons between all stages
+summary(glht(mod1, mcp(Succession  = "Tukey")))
+
+```
+
+```{r N uniqueness}
+
+#Check data distribution
+hist(subset(res2, Element == "Nitrogen")$U, xlab = "Response", main = "")
+
+#Test for differences in grasslands relative to forest reference level
+mod1 <- glmer(U ~ Succession + (1|Par) + (1|Parent_material) + (1|Distance),
+              family = gaussian(link = "identity"), 
+             data = subset(res2, Element == "Nitrogen"))
+
+
+#Check model disagnostics
+resid <- simulateResiduals(fittedModel = mod1, plot = F)
+plot(resid) #QQ-plot looks ok
+
+#Inspect results
+summ(mod1, exp = T)
+
+#Now we test for differences between grassland successional stages using the same models but without forests as reference levels
+mod1 <- glmer(U ~ Succession +  (1|Par) + (1|Parent_material) + (1|Distance),
+               family = gaussian(link = "identity"),
+             data = subset(res2, Element == "Nitrogen"))
+summ(mod1, exp = T)
+
+#This is followed bymultiple comparisons between all stages
+summary(glht(mod1, mcp(Succession  = "Tukey")))
+
+```
+
+
+                                          COMPOSITION
+#############################################################################################
+
+```{r Composition carbon redundancy}
+
+m1 = res %>% filter(Element == "Carbon")
+
+#Create subset for carbon
+c = res %>% filter(Element == "Carbon") %>%
+  dplyr::select(Q,R,D,Succession)
+
+pairwiseAdonis::pairwise.adonis2(c[,1:3] ~ Succession,
+                      data = c,           
+                      nperm=9999,
+                      method = "bray")
+
+```
+
+```{r Composition P redundancy}
+
+#Create subset for carbon
+c = res %>% filter(Element == "Phosphorus") %>%
+  dplyr::select(Q,R,D,Succession)
+
+pairwiseAdonis::pairwise.adonis2(c[,1:3] ~ Succession,
+                      data = c,           
+                      nperm=9999,
+                      method = "bray")
+
+```
+```{r Composition N redundancy}
+
+#Create subset for carbon
+c = res %>% filter(Element == "Nitrogen") %>%
+  dplyr::select(Q,R,D,Succession)
+
+pairwiseAdonis::pairwise.adonis2(c[,1:3] ~ Succession,
+                      data = c,           
+                      nperm=9999,
+                      method = "bray")
+
+```
+
+
+
