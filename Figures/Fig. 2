@@ -72,9 +72,8 @@ f = metadata %>% filter(Succession == "Forest")
 
 
 
-                          ALPHA DIVERSITY PLOTS (Figure 2a-b)
+                          #ALPHA DIVERSITY PLOTS (Figure 2a-b)
 #############################################################################################
-```{r Plot alpa diversity fungi}
 
 #Create median horizontal line
 h = median(f$shannon_fungi, na.rm = T)
@@ -103,10 +102,7 @@ p1 <- metadata %>%
   #theme(legend.position = "none")+
      theme(text=element_text(size=20));p1
 
-```
 
-
-```{r Plot alpa diversity bacteria}
 
 #Create median horizontal line
 h = median(f$shannon_bacteria, na.rm = T)
@@ -136,25 +132,18 @@ p2 <- metadata %>%
      theme(text=element_text(size=20));p2
 
 
-```
-
-
-```{r Combine plots}
-
 ggarrange(p1,p2,
           common.legend = T,
           legend = "bottom")
 
 ggarrange(p1,p2,
 legend = "none")
-```
 
 
-
-                          BETA DIVERSITY PLOTS (Figure 2c-d)
+                         
+            #BETA DIVERSITY PLOTS (Figure 2c-d)
 #############################################################################################
 
-```{r PCoA fungi}
 
 z1 = ps_fungi %>% 
    phyloseq::distance(method = "bray")
@@ -179,11 +168,8 @@ p1 = scores %>%
   labs(fill="Land use",color="Land use", shape = "Land use")+
   guides(fill = guide_legend(override.aes = list(alpha = 0.8)))+
   theme(text=element_text(size=17));p1
-  
-```
 
 
-```{r PCoA bacteria}
 
 z1 = ps_bacteria %>% 
    phyloseq::distance(method = "bray")
@@ -209,23 +195,14 @@ p2 = scores %>%
   guides(fill = guide_legend(override.aes = list(alpha = 0.8)))+
   theme(text=element_text(size=17));p2
 
-```
-
-
-```{r Combine plots}
-
+#Combine plots
 ggarrange(p1,p2,
           common.legend = T,
           legend = "right")
 
 
-```
-
-
-                                  EFFECT SIZE PLOT (Figure 2e)
+                                  #EFFECT SIZE PLOT (Figure 2e)
 #############################################################################################
-
-```{r effect size plots}
 
 #Alpha diversity
 p1 = es %>%
@@ -254,5 +231,3 @@ p2 = es %>%
   labs(x="", y = "")+
   theme(aspect.ratio=2)+
   coord_flip();p2
-
-```
