@@ -1,49 +1,30 @@
-Code to reproduce panels in manuscript figure 2
+#Code to reproduce panels in manuscript figure 2
 
 NB! The figure has been manually compiled in pages
 
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(dev = "png",
-                      dpi=300,
-                      echo=F,
-                      cache=T, echo=T)
-```
-
-
-```{r}
+#Clear directory
 rm(list=ls())
-```
 
 
-Libraries
-```{r}
+
+Libraries #Load libraries
+
 library(dplyr)
 library(vegan)
 library(tidyr)
 library(ggplot2)
 library(ggpubr)
-```
 
 
-Data loading
-```{r Load data}
 
+#Data loading
 #Load metadata
 metadata = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Metadata/Result/metadata.txt")
 row.names(metadata) = metadata$Sample
 
-```
-
-```{r Load ad results}
-
 #Load alpha diversity results
 ad_results = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Alpha diversity/Results/alpha_diversity.txt")
-
-```
-
-
-```{r Load srs-transformed phyloseq objects}
 
 #Soil fungi
 ps_fungi = readRDS("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Microbial/Amplicon/Soil/ITS/Processing/Results/ps_fungi_srs.RDS")
@@ -51,34 +32,21 @@ ps_fungi = readRDS("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processin
 #Soil bacteria
 ps_bacteria = readRDS("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Microbial/Amplicon/Soil/16S/Processing/Results/ps_bacteria_srs.RDS")
 
-```
-
-```{r Load effect size results}
-
 es_alpha = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Alpha diversity/Results/es_alpha_diversity.txt")
 
 es_beta = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Beta diversity/Results/es_permanova.txt")
   
-```
 
 
-
-                                         PREPARE DATASET
+                                      #   PREPARE DATASET
 #############################################################################################
 
-```{r prepare for alpha diversity plots}
 
-metadata = left_join(metadata,ad_results)
 
-```
-
-```{r prepare for effect size plot}
-
+metadata = left_join(metadata,ad_results) #prepare for alpha diversity plots
 es_beta = es_beta[c(1,4),]
-
 es_alpha$Diversity = "Alpha"
 es_beta$Diversity = "Beta"
-
 s1 = es_alpha %>% dplyr::select(Community, Omega2_partial, CI_low, CI_high, Diversity)
 s2 = es_beta %>% dplyr::select(Community, parOmegaSq, Diversity)
 names(s2) <- c("Community","Omega2_partial","Diversity")
@@ -87,12 +55,9 @@ s2$CI_high = NA
 s2 = s2[,c(1:2,4:5,3)]
 es = rbind(s1,s2)
 
-```
 
-                                        SET PLOT DETAILS
+                                        #SET PLOT DETAILS
 #############################################################################################
-
-```{r Set plotting details}
 
 #Set order of plotting
 metadata$Succession = ordered(metadata$Succession, levels = c("Managed","Recent","Late","Forest"))
@@ -104,8 +69,6 @@ farg2 = "grey59"
 
 #Create median line for forest reference stage
 f = metadata %>% filter(Succession == "Forest") 
-
-```
 
 
 
