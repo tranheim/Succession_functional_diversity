@@ -1,0 +1,186 @@
+---
+title: "variable_selection_ver1"
+author: "Tord Ranheim"
+date: "2024-11-17"
+output:
+  html_document:
+    keep_md: no
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dev = "png",
+                      dpi=300,
+                      echo=F,
+                      cache=T, echo=T)
+```
+
+
+
+###loading requisite libraries 
+```{r libraries to load}
+library(tidyverse)
+library(rmarkdown)
+library(knitr)
+library(magrittr)
+library(rfPermute)
+library(randomForest)
+```
+
+
+##Clear the directory and set pathway
+```{r}
+rm(list=ls())
+
+```
+
+
+Data loading
+```{r Load data}
+#Load metadata
+metadata = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Metadata/Result/metadata.txt")
+row.names(metadata) = metadata$Sample
+```
+
+
+```{r Load Q R D results}
+
+qrd = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Functional redundancy/Framework/Results/res_qrd.txt")
+
+```
+
+
+```{r merge}
+
+master = left_join(qrd, metadata)
+res = master %>% dplyr::select(Sample, Succession, Element, Q, R, D, pH, LDMC, C.N, Ecosystem_type, Parent_material, Par, Distance)
+
+rm(qrd, master)
+```
+
+
+```{r Add Specialization}
+
+res$U = res$D + res$Q
+
+```
+
+
+```{r Load environmental variables}
+
+env_omit = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Metadata/Partitioning/Results/env_omit.txt")
+
+```
+
+
+                                      PREPARE DATASET
+###################################################################################################
+
+```{r prepare datasets}
+
+#Dataset with omitted variables
+df = env_omit %>% dplyr::select(BD,Tot_C,Tot_N,N_min,MAT,MAP)
+df$Sample = row.names(df)
+df = left_join(res,df)
+
+rm(env_omit)
+```
+
+
+                                  
+                                        RANDOM FOREST
+###################################################################################################
+file:///Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/rfPermute/rfPermute_Tutorial.html
+
+```{r Carbon}
+
+#Redundancy
+t1 = subset(df, Element == "Carbon")
+t1 = t1[,c(2,5,7:9,11,15:20)] 
+t1 = na.omit(t1)
+rf <- rfPermute(R ~ ., t1, ntree = 1000, num.rep = 1000, num.cores = 10)
+plotImportance(rf)
+r1 = data.frame(round(rfPermute::importance(rf), 3))
+r1$Variable = row.names(r1)
+r1$Element = "Carbon"
+r1$Response = "Redundancy"
+k1 = r1
+
+#Specialization
+t1 = subset(df, Element == "Carbon")
+t1 = t1[,c(2,7:9,11,14:20)] 
+t1 = na.omit(t1)
+rf <- rfPermute(U ~ ., t1, ntree = 1000, num.rep = 1000, num.cores = 10)
+plotImportance(rf)
+r1 = data.frame(round(rfPermute::importance(rf), 3))
+r1$Variable = row.names(r1)
+r1$Element = "Carbon"
+r1$Response = "Specialization"
+k2 = r1
+
+```
+
+```{r Nitrogen}
+
+#Redundancy
+t1 = subset(df, Element == "Nitrogen")
+t1 = t1[,c(2,5,7:9,11,15:20)] 
+t1 = na.omit(t1)
+rf <- rfPermute(R ~ ., t1, ntree = 1000, num.rep = 1000, num.cores = 10)
+plotImportance(rf)
+r1 = data.frame(round(rfPermute::importance(rf), 3))
+r1$Variable = row.names(r1)
+r1$Element = "Nitrogen"
+r1$Response = "Redundancy"
+k3 = r1
+
+#Specialization
+t1 = subset(df, Element == "Nitrogen")
+t1 = t1[,c(2,7:9,11,14:20)] 
+t1 = na.omit(t1)
+rf <- rfPermute(U ~ ., t1, ntree = 1000, num.rep = 1000, num.cores = 10)
+plotImportance(rf)
+r1 = data.frame(round(rfPermute::importance(rf), 3))
+r1$Variable = row.names(r1)
+r1$Element = "Nitrogen"
+r1$Response = "Specialization"
+k4 = r1
+
+```
+
+
+```{r Phosphorus}
+
+#Redundancy
+t1 = subset(df, Element == "Phosphorus")
+t1 = t1[,c(2,5,7:9,11,15:20)] 
+t1 = na.omit(t1)
+rf <- rfPermute(R ~ ., t1, ntree = 1000, num.rep = 1000, num.cores = 10)
+plotImportance(rf)
+r1 = data.frame(round(rfPermute::importance(rf), 3))
+r1$Variable = row.names(r1)
+r1$Element = "Phosphorus"
+r1$Response = "Redundancy"
+k5 = r1
+
+#Specialization
+t1 = subset(df, Element == "Phosphorus")
+t1 = t1[,c(2,7:9,11,14:20)] 
+t1 = na.omit(t1)
+rf <- rfPermute(U ~ ., t1, ntree = 1000, num.rep = 1000, num.cores = 10)
+plotImportance(rf)
+r1 = data.frame(round(rfPermute::importance(rf), 3))
+r1$Variable = row.names(r1)
+r1$Element = "Phosphorus"
+r1$Response = "Specialization"
+k6 = r1
+
+```
+
+
+```{r Merge and write results}
+
+res = rbind(k1,k2,k3,k4,k5,k6)
+
+write.table(res, file = "results_variable_selection.txt")
+
+```
