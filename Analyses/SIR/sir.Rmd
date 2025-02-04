@@ -1,0 +1,860 @@
+---
+title: "sir_ver1"
+author: "Tord Ranheim"
+date: "2024-11-13"
+output:
+  html_document:
+    keep_md: no
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dev = "png",
+                      dpi=300,
+                      echo=F,
+                      cache=T, echo=T)
+```
+
+
+
+###loading requisite libraries 
+```{r libraries to load}
+library(tidyverse)
+library(rmarkdown)
+library(knitr)
+library(magrittr)
+library(ggplot2)
+library(RColorBrewer)
+library(ggpubr)
+library(ggsci)
+library(dplyr)
+library(phyloseq)
+library(phylosmith)
+library(microbiome)
+library(vegan)
+library(metagMisc)
+library(ape)
+library(microViz)
+
+```
+
+
+##Clear the directory and set pathway
+```{r}
+rm(list=ls())
+
+```
+
+
+```{r Load metadata file}
+
+metadata = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Metadata/Result/metadata.txt")
+row.names(metadata) = metadata$Sample
+
+env = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Metadata/Partitioning/Results/env_imputed.txt")
+env$Succession = metadata$Succession
+
+```
+
+
+                                        DATA PREPARATION
+###################################################################################################
+
+```{r Create subset of sir data}
+
+sir = metadata %>% dplyr::select(Basal_resp, Glucose_resp, Glycine_resp,
+                                 OA_resp, AY_resp, Lignin_resp, Chitin_resp)
+  
+
+sir$msir = rowSums(sir[,2:7]) #Add multiple substrate-induced respiration column
+
+#Standardize each individual substrate respiration by msir
+sir$Glucose_resp_std = sir$Glucose_resp/sir$msir
+sir$Glycine_resp_std = sir$Glycine_resp/sir$msir
+sir$OA_resp_std = sir$OA_resp/sir$msir
+sir$AY_resp_std = sir$AY_resp/sir$msir
+sir$Lignin_resp_std = sir$Lignin_resp/sir$msir
+sir$Chitin_resp_std = sir$Chitin_resp/sir$msir
+
+sir$Sample = row.names(sir)
+env$Sample = row.names(env)
+m1 = left_join(env, sir)
+m1$Par = metadata$Par
+m1$Distance = metadata$Distance
+
+rm(sir, env)  
+
+#Write
+write.table(m1, file = "res_sir.txt")
+
+```
+
+
+
+We are interested in comparing grasslands to their successional endpoint (i.e. Forests), but also to compare different grassland successional stages against each other. For this we create a new metadata set where the forest level is set as reference level for linear models.
+
+```{r Set forest as reference level}
+
+m1$Succession <- as.factor(m1$Succession) #Set successional stage as factor
+m1$Succession <- relevel(m1$Succession, ref="Forest") #Set forest as reference level
+
+```
+
+```{r Set plotting details}
+
+m2 = m1
+
+#Set order of plotting
+m2$Succession = ordered(m2$Succession, levels = c("Managed","Recent","Late","Forest"))
+
+#Set manual color and shape
+farg = c("#bd0026","#fd8d3c","#fecc5c", "forestgreen")
+shape = c(21,23,24,25)
+farg2 = "grey59"
+
+#Create median line for forest reference stage
+f = m2 %>% filter(Succession == "Forest") 
+
+```
+
+
+                                  TEST FOR DIFFERENCES
+###################################################################################################
+```{r Load libraries needed for LMMs}
+library(caret)
+library(DHARMa)
+library(jtools)
+library (multcomp)
+library(lme4)
+library(MASS)
+
+```
+
+```{r basal resp}
+
+h = median(f$Basal_resp)
+
+m2 %>%
+    bind_rows(tibble(var1 = "trt99")) %>% 
+  ggplot(aes(x= Succession, y = Basal_resp, fill = Succession))+
+  geom_boxplot(aes(fill= Succession),outlier.shape = NA)+
+    geom_point(position=position_jitter(0.1, seed = 123),alpha=0.5)+
+    scale_fill_manual(values=farg, na.translate = F)+
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      #ylim(1,6)+
+      theme_classic()+
+  #geom_line(aes(group = Par),alpha = 0.05)+
+  scale_x_discrete(limits = c("Managed","Recent","Late","trt99","Forest"),
+  breaks = c("Managed","Recent","Late",NA,"Forest"),
+  labels = c("Managed","Recent","Late",NA,"Forest"))+
+  geom_vline(xintercept = "trt99", linetype = 2, linewidth = 0.2)+
+    geom_hline(yintercept = h, linetype = 2, linewidth = 0.9, col = "black")+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+  #theme(legend.position = "none")+
+     theme(text=element_text(size=20))
+
+
+#Check data distribution
+hist(m1$Basal_resp, xlab = "Response", main = "")
+shapiro.test(m1$Basal_resp) #Data is skewed: use GLMMs
+
+#Test for differences in grasslands relative to forest reference level: Gamma distribution
+mod1 <- glm(Basal_resp ~ Succession + (1|Par)  + (1|Distance),
+             family = Gamma, 
+             data = m1)
+
+
+#Check model disagnostics
+resid <- simulateResiduals(fittedModel = mod1, plot = F)
+plot(resid) #Ok
+
+#Inspect results
+summary(mod1)
+summ(mod1, exp = T)
+
+```
+```{r Glucose}
+
+#Glucose
+m2 %>%
+    bind_rows(tibble(var1 = "trt99")) %>% 
+  ggplot(aes(x= Succession, y = Glucose_resp, fill = Succession))+
+  geom_boxplot(aes(fill= Succession),outlier.shape = NA)+
+    geom_point(position=position_jitter(0.1, seed = 123),alpha=0.5)+
+    scale_fill_manual(values=farg, na.translate = F)+
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      #ylim(1,6)+
+      theme_classic()+
+  #geom_line(aes(group = Par),alpha = 0.05)+
+  scale_x_discrete(limits = c("Managed","Recent","Late","trt99","Forest"),
+  breaks = c("Managed","Recent","Late",NA,"Forest"),
+  labels = c("Managed","Recent","Late",NA,"Forest"))+
+  geom_vline(xintercept = "trt99", linetype = 2, linewidth = 0.2)+
+    geom_hline(yintercept = h, linetype = 2, linewidth = 0.9, col = "black")+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+  #theme(legend.position = "none")+
+     theme(text=element_text(size=20))
+
+#Check data distribution
+hist(m1$Glucose_resp, xlab = "Response", main = "")
+
+#Test for differences in grasslands relative to forest reference level: Gamma distribution
+mod1 <- glm(Glucose_resp ~ Succession + (1|Par)  + (1|Distance),
+             family = gaussian, 
+             data = m1)
+
+#Check model disagnostics
+resid <- simulateResiduals(fittedModel = mod1, plot = F)
+plot(resid) #Ok
+
+#Inspect results
+summary(mod1)
+summ(mod1, exp = T)
+
+```
+
+
+```{r Glucose standardized}
+
+#Glucose
+m2 %>%
+    bind_rows(tibble(var1 = "trt99")) %>% 
+  ggplot(aes(x= Succession, y = Glucose_resp_std, fill = Succession))+
+  geom_boxplot(aes(fill= Succession),outlier.shape = NA)+
+    geom_point(position=position_jitter(0.1, seed = 123),alpha=0.5)+
+    scale_fill_manual(values=farg, na.translate = F)+
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      #ylim(1,6)+
+      theme_classic()+
+  #geom_line(aes(group = Par),alpha = 0.05)+
+  scale_x_discrete(limits = c("Managed","Recent","Late","trt99","Forest"),
+  breaks = c("Managed","Recent","Late",NA,"Forest"),
+  labels = c("Managed","Recent","Late",NA,"Forest"))+
+  geom_vline(xintercept = "trt99", linetype = 2, linewidth = 0.2)+
+    geom_hline(yintercept = h, linetype = 2, linewidth = 0.9, col = "black")+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+  #theme(legend.position = "none")+
+     theme(text=element_text(size=20))
+
+#Check data distribution
+hist(m1$Glucose_resp_std, xlab = "Response", main = "")
+
+#Test for differences in grasslands relative to forest reference level: Gamma distribution
+mod1 <- glm(Glucose_resp_std ~ Succession + (1|Par)  + (1|Distance),
+             family = gaussian, 
+             data = m1)
+
+#Check model disagnostics
+resid <- simulateResiduals(fittedModel = mod1, plot = F)
+plot(resid) #Ok
+
+#Inspect results
+summary(mod1)
+summ(mod1, exp = T)
+
+```
+
+
+```{r Oxalic acid}
+
+
+m2 %>%
+    bind_rows(tibble(var1 = "trt99")) %>% 
+  ggplot(aes(x= Succession, y = OA_resp, fill = Succession))+
+  geom_boxplot(aes(fill= Succession),outlier.shape = NA)+
+    geom_point(position=position_jitter(0.1, seed = 123),alpha=0.5)+
+    scale_fill_manual(values=farg, na.translate = F)+
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      #ylim(1,6)+
+      theme_classic()+
+  #geom_line(aes(group = Par),alpha = 0.05)+
+  scale_x_discrete(limits = c("Managed","Recent","Late","trt99","Forest"),
+  breaks = c("Managed","Recent","Late",NA,"Forest"),
+  labels = c("Managed","Recent","Late",NA,"Forest"))+
+  geom_vline(xintercept = "trt99", linetype = 2, linewidth = 0.2)+
+    geom_hline(yintercept = h, linetype = 2, linewidth = 0.9, col = "black")+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+  #theme(legend.position = "none")+
+     theme(text=element_text(size=20))
+
+#Check data distribution
+hist(m1$OA_resp, xlab = "Response", main = "")
+
+#Test for differences in grasslands relative to forest reference level: Gamma distribution
+mod1 <- glm(OA_resp ~ Succession + (1|Par)  + (1|Distance),
+             family = Gamma, 
+             data = m1)
+
+#Check model disagnostics
+resid <- simulateResiduals(fittedModel = mod1, plot = F)
+plot(resid) #Ok
+
+#Inspect results
+summary(mod1)
+summ(mod1, exp = T)
+
+```
+
+
+```{r Oxalic acid standardized}
+
+m2 %>%
+    bind_rows(tibble(var1 = "trt99")) %>% 
+  ggplot(aes(x= Succession, y = OA_resp_std, fill = Succession))+
+  geom_boxplot(aes(fill= Succession),outlier.shape = NA)+
+    geom_point(position=position_jitter(0.1, seed = 123),alpha=0.5)+
+    scale_fill_manual(values=farg, na.translate = F)+
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      #ylim(1,6)+
+      theme_classic()+
+  #geom_line(aes(group = Par),alpha = 0.05)+
+  scale_x_discrete(limits = c("Managed","Recent","Late","trt99","Forest"),
+  breaks = c("Managed","Recent","Late",NA,"Forest"),
+  labels = c("Managed","Recent","Late",NA,"Forest"))+
+  geom_vline(xintercept = "trt99", linetype = 2, linewidth = 0.2)+
+    geom_hline(yintercept = h, linetype = 2, linewidth = 0.9, col = "black")+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+  #theme(legend.position = "none")+
+     theme(text=element_text(size=20))
+
+#Check data distribution
+hist(m1$OA_resp_std, xlab = "Response", main = "")
+
+#Test for differences in grasslands relative to forest reference level: Gamma distribution
+mod1 <- glm(OA_resp_std ~ Succession + (1|Par)  + (1|Distance),
+             family = gaussian, 
+             data = m1)
+
+#Check model disagnostics
+resid <- simulateResiduals(fittedModel = mod1, plot = F)
+plot(resid) #Ok
+
+#Inspect results
+summary(mod1)
+summ(mod1, exp = T)
+
+```
+
+
+```{r Autolyzed yeast}
+
+m2 %>%
+    bind_rows(tibble(var1 = "trt99")) %>% 
+  ggplot(aes(x= Succession, y = AY_resp, fill = Succession))+
+  geom_boxplot(aes(fill= Succession),outlier.shape = NA)+
+    geom_point(position=position_jitter(0.1, seed = 123),alpha=0.5)+
+    scale_fill_manual(values=farg, na.translate = F)+
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      #ylim(1,6)+
+      theme_classic()+
+  #geom_line(aes(group = Par),alpha = 0.05)+
+  scale_x_discrete(limits = c("Managed","Recent","Late","trt99","Forest"),
+  breaks = c("Managed","Recent","Late",NA,"Forest"),
+  labels = c("Managed","Recent","Late",NA,"Forest"))+
+  geom_vline(xintercept = "trt99", linetype = 2, linewidth = 0.2)+
+    geom_hline(yintercept = h, linetype = 2, linewidth = 0.9, col = "black")+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+  #theme(legend.position = "none")+
+     theme(text=element_text(size=20))
+
+#Check data distribution
+hist(m1$AY_resp, xlab = "Response", main = "")
+
+#Test for differences in grasslands relative to forest reference level: Gamma distribution
+mod1 <- glm(AY_resp ~ Succession + (1|Par)  + (1|Distance),
+             family = Gamma, 
+             data = m1)
+
+#Check model disagnostics
+resid <- simulateResiduals(fittedModel = mod1, plot = F)
+plot(resid) #Ok
+
+#Inspect results
+summary(mod1)
+summ(mod1, exp = T)
+
+```
+
+```{r Autolyzed yeast standardized}
+
+m2 %>%
+    bind_rows(tibble(var1 = "trt99")) %>% 
+  ggplot(aes(x= Succession, y = AY_resp_std, fill = Succession))+
+  geom_boxplot(aes(fill= Succession),outlier.shape = NA)+
+    geom_point(position=position_jitter(0.1, seed = 123),alpha=0.5)+
+    scale_fill_manual(values=farg, na.translate = F)+
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      #ylim(1,6)+
+      theme_classic()+
+  #geom_line(aes(group = Par),alpha = 0.05)+
+  scale_x_discrete(limits = c("Managed","Recent","Late","trt99","Forest"),
+  breaks = c("Managed","Recent","Late",NA,"Forest"),
+  labels = c("Managed","Recent","Late",NA,"Forest"))+
+  geom_vline(xintercept = "trt99", linetype = 2, linewidth = 0.2)+
+    geom_hline(yintercept = h, linetype = 2, linewidth = 0.9, col = "black")+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+  #theme(legend.position = "none")+
+     theme(text=element_text(size=20))
+
+#Check data distribution
+hist(m1$AY_resp_std, xlab = "Response", main = "")
+
+#Test for differences in grasslands relative to forest reference level: Gamma distribution
+mod1 <- glm(AY_resp_std ~ Succession + (1|Par)  + (1|Distance),
+             family = Gamma, 
+             data = m1)
+
+#Check model disagnostics
+resid <- simulateResiduals(fittedModel = mod1, plot = F)
+plot(resid) #Ok
+
+#Inspect results
+summary(mod1)
+summ(mod1, exp = T)
+
+```
+
+
+```{r Lignin}
+
+m2 %>%
+    bind_rows(tibble(var1 = "trt99")) %>% 
+  ggplot(aes(x= Succession, y = Lignin_resp, fill = Succession))+
+  geom_boxplot(aes(fill= Succession),outlier.shape = NA)+
+    geom_point(position=position_jitter(0.1, seed = 123),alpha=0.5)+
+    scale_fill_manual(values=farg, na.translate = F)+
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      #ylim(1,6)+
+      theme_classic()+
+  #geom_line(aes(group = Par),alpha = 0.05)+
+  scale_x_discrete(limits = c("Managed","Recent","Late","trt99","Forest"),
+  breaks = c("Managed","Recent","Late",NA,"Forest"),
+  labels = c("Managed","Recent","Late",NA,"Forest"))+
+  geom_vline(xintercept = "trt99", linetype = 2, linewidth = 0.2)+
+    geom_hline(yintercept = h, linetype = 2, linewidth = 0.9, col = "black")+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+  #theme(legend.position = "none")+
+     theme(text=element_text(size=20))
+
+#Check data distribution
+hist(m1$Lignin_resp, xlab = "Response", main = "")
+
+#Test for differences in grasslands relative to forest reference level: Gamma distribution
+mod1 <- glm(Lignin_resp ~ Succession + (1|Par)  + (1|Distance),
+             family = gaussian, 
+             data = m1)
+
+#Check model disagnostics
+resid <- simulateResiduals(fittedModel = mod1, plot = F)
+plot(resid) #Ok
+
+#Inspect results
+summary(mod1)
+summ(mod1, exp = T)
+
+```
+
+
+```{r Lignin standardized}
+
+m2 %>%
+    bind_rows(tibble(var1 = "trt99")) %>% 
+  ggplot(aes(x= Succession, y = Lignin_resp_std, fill = Succession))+
+  geom_boxplot(aes(fill= Succession),outlier.shape = NA)+
+    geom_point(position=position_jitter(0.1, seed = 123),alpha=0.5)+
+    scale_fill_manual(values=farg, na.translate = F)+
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      #ylim(1,6)+
+      theme_classic()+
+  #geom_line(aes(group = Par),alpha = 0.05)+
+  scale_x_discrete(limits = c("Managed","Recent","Late","trt99","Forest"),
+  breaks = c("Managed","Recent","Late",NA,"Forest"),
+  labels = c("Managed","Recent","Late",NA,"Forest"))+
+  geom_vline(xintercept = "trt99", linetype = 2, linewidth = 0.2)+
+    geom_hline(yintercept = h, linetype = 2, linewidth = 0.9, col = "black")+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+  #theme(legend.position = "none")+
+     theme(text=element_text(size=20))
+
+#Check data distribution
+hist(m1$Lignin_resp_std, xlab = "Response", main = "")
+
+#Test for differences in grasslands relative to forest reference level: Gamma distribution
+mod1 <- glm(Lignin_resp_std ~ Succession + (1|Par)  + (1|Distance),
+             family = gaussian, 
+             data = m1)
+
+#Check model disagnostics
+resid <- simulateResiduals(fittedModel = mod1, plot = F)
+plot(resid) #Ok
+
+#Inspect results
+summary(mod1)
+summ(mod1, exp = T)
+
+```
+
+
+```{r Chitin standardized}
+
+m2 %>%
+  filter(Chitin_resp > 0) %>%
+    bind_rows(tibble(var1 = "trt99")) %>% 
+  ggplot(aes(x= Succession, y = Chitin_resp, fill = Succession))+
+  geom_boxplot(aes(fill= Succession),outlier.shape = NA)+
+    geom_point(position=position_jitter(0.1, seed = 123),alpha=0.5)+
+    scale_fill_manual(values=farg, na.translate = F)+
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      #ylim(1,6)+
+      theme_classic()+
+  #geom_line(aes(group = Par),alpha = 0.05)+
+  scale_x_discrete(limits = c("Managed","Recent","Late","trt99","Forest"),
+  breaks = c("Managed","Recent","Late",NA,"Forest"),
+  labels = c("Managed","Recent","Late",NA,"Forest"))+
+  geom_vline(xintercept = "trt99", linetype = 2, linewidth = 0.2)+
+    geom_hline(yintercept = h, linetype = 2, linewidth = 0.9, col = "black")+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+  #theme(legend.position = "none")+
+     theme(text=element_text(size=20))
+
+#Check data distribution
+hist(m1$Chitin_resp, xlab = "Response", main = "")
+
+#Test for differences in grasslands relative to forest reference level
+t1 = m1 %>% filter(Chitin_resp > 0)
+mod1 <- glm(Chitin_resp ~ Succession + (1|Par)  + (1|Distance),
+             family = gaussian, 
+             data = t1)
+
+#Check model disagnostics
+resid <- simulateResiduals(fittedModel = mod1, plot = F)
+plot(resid) #Ok
+
+#Inspect results
+summary(mod1)
+summ(mod1, exp = T)
+
+```
+
+```{r Chitin standardized standardized}
+
+m2 %>%
+  filter(Chitin_resp_std > 0) %>%
+    bind_rows(tibble(var1 = "trt99")) %>% 
+  ggplot(aes(x= Succession, y = Chitin_resp, fill = Succession))+
+  geom_boxplot(aes(fill= Succession),outlier.shape = NA)+
+    geom_point(position=position_jitter(0.1, seed = 123),alpha=0.5)+
+    scale_fill_manual(values=farg, na.translate = F)+
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      #ylim(1,6)+
+      theme_classic()+
+  #geom_line(aes(group = Par),alpha = 0.05)+
+  scale_x_discrete(limits = c("Managed","Recent","Late","trt99","Forest"),
+  breaks = c("Managed","Recent","Late",NA,"Forest"),
+  labels = c("Managed","Recent","Late",NA,"Forest"))+
+  geom_vline(xintercept = "trt99", linetype = 2, linewidth = 0.2)+
+    geom_hline(yintercept = h, linetype = 2, linewidth = 0.9, col = "black")+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+  #theme(legend.position = "none")+
+     theme(text=element_text(size=20))
+
+#Check data distribution
+hist(m1$Chitin_resp, xlab = "Response", main = "")
+
+#Test for differences in grasslands relative to forest reference level
+t1 = m1 %>% filter(Chitin_resp_std > 0)
+mod1 <- glm(Chitin_resp_std ~ Succession + (1|Par)  + (1|Distance),
+             family = Gamma, 
+             data = t1)
+
+#Check model disagnostics
+resid <- simulateResiduals(fittedModel = mod1, plot = F)
+plot(resid) #Ok
+
+#Inspect results
+summary(mod1)
+summ(mod1, exp = T)
+
+```
+
+
+                                      EFFECT SIZE PLOTS
+###################################################################################################
+```{r Prepare dataframe}
+
+#Paired sites only
+s1 = m1 %>% 
+  count(Par) %>%
+  filter(n == 2) %>%
+  semi_join(m1, ., by = "Par")
+
+#Split by land use
+s1 = s1 %>% dplyr::group_split(Succession)
+m = s1[[3]]
+r = s1[[4]]
+l = s1[[2]]
+f = s1[[1]]
+
+#Merge paired dataframes
+mf = f %>% filter(Par %in% m$Par)
+mf = rbind(m, mf)
+mf$Succession = ordered(mf$Succession, levels = c("Managed","Forest"))
+rf = f %>% filter(Par %in% r$Par)
+rf = rbind(r, rf)
+rf$Succession = ordered(rf$Succession, levels = c("Recent","Forest"))
+lf = f %>% filter(Par %in% l$Par)
+lf = rbind(l, lf)
+lf$Succession = ordered(lf$Succession, levels = c("Late","Forest"))
+
+```
+
+
+
+```{r}
+library(effectsize)
+
+```
+
+
+```{r Calculate effect sizes}
+
+#Basal resp
+v1 = hedges_g(Basal_resp ~ Succession, data = mf)
+v2 = hedges_g(Basal_resp ~ Succession, data = rf)
+v3 = hedges_g(Basal_resp ~ Succession, data = lf)
+r1 = rbind(v1,v2,v3)
+r1$Contrast = c("Managed vs Forest", "Recent vs Forest", "Late vs Forest")
+r1$Substrate = "Basal_resp"
+r1$Standardized = "Yes"
+k1 = r1
+
+#Glucose
+v1 = hedges_g(Glucose_resp ~ Succession, data = mf)
+v2 = hedges_g(Glucose_resp ~ Succession, data = rf)
+v3 = hedges_g(Glucose_resp ~ Succession, data = lf)
+r1 = rbind(v1,v2,v3)
+r1$Contrast = c("Managed vs Forest", "Recent vs Forest", "Late vs Forest")
+r1$Substrate = "Glucose_resp"
+r1$Standardized = "No"
+k2 = r1
+
+#Glucose Standardized
+v1 = hedges_g(Glucose_resp_std ~ Succession, data = mf)
+v2 = hedges_g(Glucose_resp_std ~ Succession, data = rf)
+v3 = hedges_g(Glucose_resp_std ~ Succession, data = lf)
+r1 = rbind(v1,v2,v3)
+r1$Contrast = c("Managed vs Forest", "Recent vs Forest", "Late vs Forest")
+r1$Substrate = "Glucose_resp"
+r1$Standardized = "Yes"
+k3 = r1
+
+#Glycine
+v1 = hedges_g(Glycine_resp ~ Succession, data = mf)
+v2 = hedges_g(Glycine_resp ~ Succession, data = rf)
+v3 = hedges_g(Glycine_resp ~ Succession, data = lf)
+r1 = rbind(v1,v2,v3)
+r1$Contrast = c("Managed vs Forest", "Recent vs Forest", "Late vs Forest")
+r1$Substrate = "Glycine_resp"
+r1$Standardized = "No"
+k4 = r1
+
+#Glycine Standardized
+v1 = hedges_g(Glycine_resp_std ~ Succession, data = mf)
+v2 = hedges_g(Glycine_resp_std ~ Succession, data = rf)
+v3 = hedges_g(Glycine_resp_std ~ Succession, data = lf)
+r1 = rbind(v1,v2,v3)
+r1$Contrast = c("Managed vs Forest", "Recent vs Forest", "Late vs Forest")
+r1$Substrate = "Glycine_resp"
+r1$Standardized = "Yes"
+k5 = r1
+
+
+#Oxalic acid
+v1 = hedges_g(OA_resp ~ Succession, data = mf)
+v2 = hedges_g(OA_resp ~ Succession, data = rf)
+v3 = hedges_g(OA_resp ~ Succession, data = lf)
+r1 = rbind(v1,v2,v3)
+r1$Contrast = c("Managed vs Forest", "Recent vs Forest", "Late vs Forest")
+r1$Substrate = "OA_resp"
+r1$Standardized = "No"
+k6 = r1
+
+#Oxalic acid Standardized
+v1 = hedges_g(OA_resp_std ~ Succession, data = mf)
+v2 = hedges_g(OA_resp_std ~ Succession, data = rf)
+v3 = hedges_g(OA_resp_std ~ Succession, data = lf)
+r1 = rbind(v1,v2,v3)
+r1$Contrast = c("Managed vs Forest", "Recent vs Forest", "Late vs Forest")
+r1$Substrate = "OA_resp"
+r1$Standardized = "Yes"
+k7 = r1
+
+
+#Autolyzed yeast
+v1 = hedges_g(AY_resp ~ Succession, data = mf)
+v2 = hedges_g(AY_resp ~ Succession, data = rf)
+v3 = hedges_g(AY_resp ~ Succession, data = lf)
+r1 = rbind(v1,v2,v3)
+r1$Contrast = c("Managed vs Forest", "Recent vs Forest", "Late vs Forest")
+r1$Substrate = "AY_resp"
+r1$Standardized = "No"
+k8 = r1
+
+#Autolyzed yeast standardized
+v1 = hedges_g(AY_resp_std ~ Succession, data = mf)
+v2 = hedges_g(AY_resp_std ~ Succession, data = rf)
+v3 = hedges_g(AY_resp_std ~ Succession, data = lf)
+r1 = rbind(v1,v2,v3)
+r1$Contrast = c("Managed vs Forest", "Recent vs Forest", "Late vs Forest")
+r1$Substrate = "AY_resp"
+r1$Standardized = "Yes"
+k9 = r1
+
+
+#Lignin
+v1 = hedges_g(Lignin_resp ~ Succession, data = mf)
+v2 = hedges_g(Lignin_resp ~ Succession, data = rf)
+v3 = hedges_g(Lignin_resp ~ Succession, data = lf)
+r1 = rbind(v1,v2,v3)
+r1$Contrast = c("Managed vs Forest", "Recent vs Forest", "Late vs Forest")
+r1$Substrate = "Lignin_resp"
+r1$Standardized = "No"
+k10 = r1
+
+#Lignin standardized
+v1 = hedges_g(Lignin_resp_std ~ Succession, data = mf)
+v2 = hedges_g(Lignin_resp_std ~ Succession, data = rf)
+v3 = hedges_g(Lignin_resp_std ~ Succession, data = lf)
+r1 = rbind(v1,v2,v3)
+r1$Contrast = c("Managed vs Forest", "Recent vs Forest", "Late vs Forest")
+r1$Substrate = "Lignin_resp"
+r1$Standardized = "Yes"
+k11 = r1
+
+
+#Chitin
+v1 = hedges_g(Chitin_resp ~ Succession, data = mf)
+v2 = hedges_g(Chitin_resp ~ Succession, data = rf)
+v3 = hedges_g(Chitin_resp ~ Succession, data = lf)
+r1 = rbind(v1,v2,v3)
+r1$Contrast = c("Managed vs Forest", "Recent vs Forest", "Late vs Forest")
+r1$Substrate = "Chitin_resp"
+r1$Standardized = "No"
+k12 = r1
+
+#Chitin standardized
+v1 = hedges_g(Chitin_resp_std ~ Succession, data = mf)
+v2 = hedges_g(Chitin_resp_std ~ Succession, data = rf)
+v3 = hedges_g(Chitin_resp_std ~ Succession, data = lf)
+r1 = rbind(v1,v2,v3)
+r1$Contrast = c("Managed vs Forest", "Recent vs Forest", "Late vs Forest")
+r1$Substrate = "Chitin_resp"
+r1$Standardized = "Yes"
+k13 = r1
+
+```
+
+
+```{r Merge and write}
+
+res = rbind(k1,k2,k3,k4,k5,k6,k7,k8,k9,k10,k11,k12,k13)
+
+write.table(res, file = "res_effectsize.txt")
+
+```
+
+
+```{r Set plot details effect size}
+
+farg3 = c("#bd0026","#fd8d3c","#fecc5c")
+
+res$Contrast = ordered(res$Contrast, levels = c(
+  "Managed vs Forest", "Recent vs Forest", "Late vs Forest"
+))
+
+res$Substrate = ordered(res$Substrate, levels = c(
+  "Chitin_resp", "Lignin_resp", "AY_resp", "OA_resp", "Glycine_resp", "Glucose_resp", 
+  "Chitin_resp_std", "Lignin_resp_std", "AY_resp_std", "OA_resp_std", 
+  "Glycine_resp_std", "Glucose_resp_std", "Basal_resp"))
+
+```
+
+
+```{r Plot effect size}
+
+#Not standardized
+res %>%
+  filter(Standardized == "No") %>%
+  ggplot(aes(x= Substrate, y = Hedges_g, color = Contrast))+
+  geom_pointrange(aes(ymin = CI_low, ymax = CI_high), position = position_dodge(0.6))+
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  theme_classic()+
+  scale_color_manual(values = farg3) +
+  theme(text=element_text(size=20)) + 
+  coord_flip()
+
+
+#standardized
+res %>%
+  filter(Standardized == "Yes") %>%
+  ggplot(aes(x= Substrate, y = Hedges_g, color = Contrast))+
+  geom_pointrange(aes(ymin = CI_low, ymax = CI_high), position = position_dodge(0.6))+
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  theme_classic()+
+  scale_color_manual(values = farg3) +
+  theme(text=element_text(size=20)) + 
+  coord_flip()
+  
+
+```
+
+
+
+
+
+
