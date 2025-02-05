@@ -1,5 +1,7 @@
 # Succession_functional_diversity
 
+The manuscript is accessible on BioarXiv on this link: 
+
 This repository contains all the necessary code to reproduce the main figures and central data/statistics
 
 Everything necessary to generate table and figures should already by found in the "data" folder upon download
