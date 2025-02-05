@@ -1,10 +1,8 @@
 # Succession_functional_diversity
 
-The manuscript is accessible on BioarXiv ()
+This repository contains all the necessary code to reproduce the main figures and central data/statistics in the manuscript "Functional diversity of soil microbial communities increases with ecosystem development" (Accessible on BioarXiv: )
 
-This repository contains all the necessary code to reproduce the main figures and central data/statistics
-
-Everything necessary to generate table and figures should already by found in the "data" folder upon download
+All input data needed to generate table and figures are found in the "data" folder. Pathways in 
 
 Following Lotus2 and MATAFILER processing, 16S, ITS, and shotgun metagenome sequence data have been arranged into phyloseq R-Data objects (from the "phyloseq" R package)
 	- The phyloseq data represent the "initial" state of the data input into R scripts
