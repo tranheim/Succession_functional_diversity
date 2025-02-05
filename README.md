@@ -12,7 +12,7 @@ Following Lotus2 and MATAFILER processing, 16S, ITS, and shotgun metagenome sequ
 	- Subsequent scripts proceed with the calculations and figures outlined in the methods section of the manuscript
 
 
-System requirements
+System requirements/
 MacOS Sequoia 15.1 or higher
 32gb RAM for reasonable processing times
 
