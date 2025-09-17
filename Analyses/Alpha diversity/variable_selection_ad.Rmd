@@ -1,0 +1,220 @@
+---
+title: "variable_selection_ver1"
+author: "Tord Ranheim"
+date: "2024-10-21"
+output:
+  html_document:
+    keep_md: no
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dev = "png",
+                      dpi=300,
+                      echo=F,
+                      cache=T, echo=T)
+```
+
+
+
+###loading requisite libraries 
+```{r libraries to load}
+library(tidyverse)
+library(rmarkdown)
+library(knitr)
+library(magrittr)
+library(rfPermute)
+library(randomForest)
+```
+
+
+##Clear the directory and set pathway
+```{r}
+rm(list=ls())
+
+```
+
+
+Data loading
+```{r Load data}
+
+#Load metadata
+metadata = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Metadata/Result/metadata.txt")
+row.names(metadata) = metadata$Sample
+
+#Load alpha diversity results
+ad_results = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Revision/diversity/results/diversity_results.txt")
+
+```
+
+
+```{r Select environmental variables to use for the analyses}
+
+names = c("Sample", "Succession", "Parent_material", "BD", "pH","Tot_C","Tot_N","C.N",
+                                 "N_min","MAT","MAP","LDMC")
+
+env = metadata[names]
+df = left_join(env, ad_results)
+
+```
+
+                                  
+                      VARIABLE SELECTION USING RANDOM FOREST WITH PERMUTATIONS
+###################################################################################################
+
+```{r vs shannon fungi}
+
+#Fungal taxonomic diversity
+#Prepare dataframe
+t1 = df[names]
+t1$response = df$shannon_fungi
+t1 = na.omit(t1)
+
+#Run analyses
+rp1 <- rfPermute(response ~ ., t1, ntree = 1000, num.rep = 1000, num.cores = 10)
+
+#Process results
+k1 = data.frame(round(rfPermute::importance(rp1), 3))
+k1$Variable = row.names(k1)
+k1$Community = "Fungi"
+k1$Diversity = "Taxonomic"
+r1 = k1
+
+```
+
+
+```{r vs shannon bacteria taxonomic}
+
+#Prepare dataframe
+t1 = df[names]
+t1$response = df$shannon_bacteria
+t1 = na.omit(t1)
+
+#Run analyses
+rp1 <- rfPermute(response ~ ., t1, ntree = 1000, num.rep = 1000, num.cores = 10)
+
+#Process results
+k1 = data.frame(round(rfPermute::importance(rp1), 3))
+k1$Variable = row.names(k1)
+k1$Community = "Bacteria"
+k1$Diversity = "Taxonomic"
+r2 = k1
+
+```
+
+
+```{r vs fungi c cycling}
+
+#Prepare dataframe
+t1 = df[names]
+t1$response = df$cazyme_div_fungi
+t1 = na.omit(t1)
+
+#Run analyses
+rp1 <- rfPermute(response ~ ., t1, ntree = 1000, num.rep = 1000, num.cores = 10)
+
+#Process results
+k1 = data.frame(round(rfPermute::importance(rp1), 3))
+k1$Variable = row.names(k1)
+k1$Community = "Fungi"
+k1$Diversity = "C-cycling"
+r3 = k1
+
+```
+
+
+
+```{r vs bacteria c cycling}
+
+#Prepare dataframe
+t1 = df[names]
+t1$response = df$cazyme_div_bacteria
+t1 = na.omit(t1)
+
+#Run analyses
+rp1 <- rfPermute(response ~ ., t1, ntree = 1000, num.rep = 1000, num.cores = 10)
+
+#Process results
+k1 = data.frame(round(rfPermute::importance(rp1), 3))
+k1$Variable = row.names(k1)
+k1$Community = "Bacteria"
+k1$Diversity = "C-cycling"
+r4 = k1
+
+```
+
+
+```{r vs fungi p cycling}
+
+#Prepare dataframe
+t1 = df[names]
+t1$response = df$pcyc_div_fungi
+t1 = na.omit(t1)
+
+#Run analyses
+rp1 <- rfPermute(response ~ ., t1, ntree = 1000, num.rep = 1000, num.cores = 10)
+
+#Process results
+k1 = data.frame(round(rfPermute::importance(rp1), 3))
+k1$Variable = row.names(k1)
+k1$Community = "Fungi"
+k1$Diversity = "P-cycling"
+r5 = k1
+
+```
+
+
+
+```{r vs bacteria p cycling}
+
+#Prepare dataframe
+t1 = df[names]
+t1$response = df$pcyc_div_bacteria
+t1 = na.omit(t1)
+
+#Run analyses
+rp1 <- rfPermute(response ~ ., t1, ntree = 1000, num.rep = 1000, num.cores = 10)
+
+#Process results
+k1 = data.frame(round(rfPermute::importance(rp1), 3))
+k1$Variable = row.names(k1)
+k1$Community = "Bacteria"
+k1$Diversity = "P-cycling"
+r6 = k1
+
+```
+
+
+```{r vs bacteria n cycling}
+
+#Prepare dataframe
+t1 = df[names]
+t1$response = df$ncyc_div_bacteria
+t1 = na.omit(t1)
+
+#Run analyses
+rp1 <- rfPermute(response ~ ., t1, ntree = 1000, num.rep = 1000, num.cores = 10)
+
+#Process results
+k1 = data.frame(round(rfPermute::importance(rp1), 3))
+k1$Variable = row.names(k1)
+k1$Community = "Bacteria"
+k1$Diversity = "N-cycling"
+r7 = k1
+
+```
+
+
+```{r Merge and write results}
+
+res = rbind(r1,r2,r3,r4,r5,r6,r7)
+
+write.table(res, file = "./results/results_vs_ad.txt")
+
+```
+
+
+
+
+
+
+
