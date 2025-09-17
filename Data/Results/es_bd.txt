@@ -1,0 +1,211 @@
+"Df" "SumOfSqs" "F" "parOmegaSq" "Pr(>F)" "Community" "R2" "Comparison" "Diversity" "Factor" "Covariates"
+"sample_data(f1)$Succession" 1 2.1774965800257 5.14365227054864 0.050443974135714 0.001 "Fungi" 0.0633894596387985 "Managed vs Forest" "Taxonomic" "Succession" 0
+"Residual" 76 32.1735862724448 NA NA NA "Fungi" 0.936610540361201 "Managed vs Forest" "Taxonomic" "Residual" 0
+"Total" 77 34.3510828524705 NA NA NA "Fungi" 1 "Managed vs Forest" "Taxonomic" "Total" 0
+"sample_data(f1)$Succession1" 1 1.64210987433163 3.97899437068028 0.0662307908916289 0.001 "Fungi" 0.0904748830121722 "Recent vs Forest" "Taxonomic" "Succession" 0
+"Residual1" 40 16.5077878614931 NA NA NA "Fungi" 0.909525116987827 "Recent vs Forest" "Taxonomic" "Residual" 0
+"Total1" 41 18.1498977358247 NA NA NA "Fungi" 1 "Recent vs Forest" "Taxonomic" "Total" 0
+"sample_data(f1)$Succession2" 1 1.01947796151803 2.3091343549365 0.0350888429220091 0.001 "Fungi" 0.063596513548458 "Late vs Forest" "Taxonomic" "Succession" 0
+"Residual2" 34 15.0109284968679 NA NA NA "Fungi" 0.936403486451542 "Late vs Forest" "Taxonomic" "Residual" 0
+"Total2" 35 16.030406458386 NA NA NA "Fungi" 1 "Late vs Forest" "Taxonomic" "Total" 0
+"sample_data(f1)$Succession3" 1 0.552570441490275 1.33163288305475 0.00434463236968659 0.036 "Fungi" 0.0165295796273581 "Managed vs Forest" "Taxonomic" "Succession" 1
+"sample_data(f1)$pH" 1 0.506942470030026 1.22167458159425 0.00290828800090124 0.058 "Fungi" 0.015164665526175 "Managed vs Forest" "Taxonomic" "pH" 1
+"sample_data(f1)$C.N" 1 0.645500608290941 1.55558417803496 0.00725726521455196 0.005 "Fungi" 0.019309490524822 "Managed vs Forest" "Taxonomic" "C:N" 1
+"sample_data(f1)$Parent_material" 8 3.2598921075283 0.981996864030536 -0.00189866504151225 0.651 "Fungi" 0.0975163384104641 "Managed vs Forest" "Taxonomic" "Parent material" 1
+"sample_data(f1)$LDMC" 1 0.451493450760829 1.08804865474796 0.001157194280898 0.221 "Fungi" 0.0135059648240579 "Managed vs Forest" "Taxonomic" "LDMC" 1
+"Residual3" 63 26.1422936132585 NA NA NA "Fungi" 0.782019976958424 "Managed vs Forest" "Taxonomic" "Residual" 1
+"Total3" 75 33.4291890022247 NA NA NA "Fungi" 1 "Managed vs Forest" "Taxonomic" "Total" 1
+"sample_data(f1)$Succession4" 1 0.434890395565645 1.09547840414508 0.00244218533811211 0.2 "Fungi" 0.0258467783998055 "Recent vs Forest" "Taxonomic" "Succession" 1
+"sample_data(f1)$pH1" 1 0.425506352339397 1.07184022587594 0.00183867013840729 0.269 "Fungi" 0.0252890579069269 "Recent vs Forest" "Taxonomic" "pH" 1
+"sample_data(f1)$C.N1" 1 0.510698063545357 1.28643608908627 0.00729096649125283 0.06 "Fungi" 0.0303522446397052 "Recent vs Forest" "Taxonomic" "C:N" 1
+"sample_data(f1)$Parent_material1" 7 2.70608846764249 0.973795928562197 -0.00472552038927301 0.685 "Fungi" 0.16083056711899 "Recent vs Forest" "Taxonomic" "Parent material" 1
+"sample_data(f1)$LDMC1" 1 0.412354709268103 1.0387115545819 0.00099161967801572 0.322 "Fungi" 0.0245074181937414 "Recent vs Forest" "Taxonomic" "LDMC" 1
+"Residual4" 27 10.7186418608005 NA NA NA "Fungi" 0.63703950178677 "Recent vs Forest" "Taxonomic" "Residual" 1
+"Total4" 38 16.8257099139643 NA NA NA "Fungi" 1 "Recent vs Forest" "Taxonomic" "Total" 1
+"sample_data(f1)$Succession5" 1 0.396149371562412 0.938137975124455 -0.0017706159646971 0.674 "Fungi" 0.0253463668794882 "Late vs Forest" "Taxonomic" "Succession" 1
+"sample_data(f1)$pH2" 1 0.543172114266717 1.28630871080901 0.00811387536042582 0.014 "Fungi" 0.0347531529145503 "Late vs Forest" "Taxonomic" "pH" 1
+"sample_data(f1)$C.N2" 1 0.646279268662701 1.53048109625139 0.0149303099728463 0.002 "Fungi" 0.041350138675031 "Late vs Forest" "Taxonomic" "C:N" 1
+"sample_data(f1)$Parent_material2" 7 3.15814052962457 1.06841790146526 0.0134988674563483 0.075 "Fungi" 0.202063651407899 "Late vs Forest" "Taxonomic" "Parent material" 1
+"sample_data(f1)$LDMC2" 1 0.439115981084765 1.03988900882239 0.00113838856088689 0.342 "Fungi" 0.0280954497424145 "Late vs Forest" "Taxonomic" "LDMC" 1
+"Residual5" 23 9.71225532654378 NA NA NA "Fungi" 0.621407995077581 "Late vs Forest" "Taxonomic" "Residual" 1
+"Total5" 34 15.6294341293939 NA NA NA "Fungi" 1 "Late vs Forest" "Taxonomic" "Total" 1
+"sample_data(f1)$Succession6" 1 0.190739092742197 11.7404269650833 0.251294330163282 0.001 "Fungi" 0.281272325625811 "Managed vs Forest" "C-cycling" "Succession" 0
+"Residual6" 30 0.487390518188477 NA NA NA "Fungi" 0.718727674374188 "Managed vs Forest" "C-cycling" "Residual" 0
+"Total6" 31 0.678129610930674 NA NA NA "Fungi" 1 "Managed vs Forest" "C-cycling" "Total" 0
+"sample_data(f1)$Succession11" 1 0.195676990141239 8.59310652296472 0.18255685034664 0.001 "Fungi" 0.211688812683093 "Recent vs Forest" "C-cycling" "Succession" 0
+"Residual11" 32 0.728684517966303 NA NA NA "Fungi" 0.788311187316906 "Recent vs Forest" "C-cycling" "Residual" 0
+"Total11" 33 0.924361508107542 NA NA NA "Fungi" 1 "Recent vs Forest" "C-cycling" "Total" 0
+"sample_data(f1)$Succession21" 1 0.14684614244398 4.38067138310318 0.107731008742008 0.019 "Fungi" 0.14419271147311 "Late vs Forest" "C-cycling" "Succession" 0
+"Residual21" 26 0.871555834630739 NA NA NA "Fungi" 0.855807288526888 "Late vs Forest" "C-cycling" "Residual" 0
+"Total21" 27 1.01840197707472 NA NA NA "Fungi" 1 "Late vs Forest" "C-cycling" "Total" 0
+"sample_data(f1)$Succession31" 1 0.0347205601981067 2.53767104121734 0.0458490704177866 0.053 "Fungi" 0.0512004779594504 "Managed vs Forest" "C-cycling" "Succession" 1
+"sample_data(f1)$pH3" 1 0.0276116778464506 2.01809403046962 0.0308344276180843 0.088 "Fungi" 0.040717404757707 "Managed vs Forest" "C-cycling" "pH" 1
+"sample_data(f1)$C.N3" 1 0.0241649856251368 1.76618072641832 0.0233832784118342 0.122 "Fungi" 0.035634759543935 "Managed vs Forest" "C-cycling" "C:N" 1
+"sample_data(f1)$Parent_material3" 5 0.0673735548849166 0.9848453953496 -0.00237352726840314 0.476 "Fungi" 0.0993520321173591 "Managed vs Forest" "C-cycling" "Parent material" 1
+"sample_data(f1)$LDMC3" 1 0.0249589232104356 1.82420837364667 0.0251097715522791 0.107 "Fungi" 0.0368055351191369 "Managed vs Forest" "C-cycling" "LDMC" 1
+"Residual31" 22 0.30100525716364 NA NA NA "Fungi" 0.443875702095557 "Managed vs Forest" "C-cycling" "Residual" 1
+"Total31" 31 0.678129610930674 NA NA NA "Fungi" 1 "Managed vs Forest" "C-cycling" "Total" 1
+"sample_data(f1)$Succession41" 1 0.00626818215251862 0.352946710779933 -0.0206377185273496 0.952 "Fungi" 0.00725378448653275 "Recent vs Forest" "C-cycling" "Succession" 1
+"sample_data(f1)$pH11" 1 0.0377840227930951 2.12753015792601 0.0340360465314146 0.059 "Fungi" 0.0437251425862322 "Recent vs Forest" "C-cycling" "pH" 1
+"sample_data(f1)$C.N11" 1 0.0373908912007547 2.10539383529785 0.0333901430321984 0.091 "Fungi" 0.0432701953979891 "Recent vs Forest" "C-cycling" "C:N" 1
+"sample_data(f1)$Parent_material11" 5 0.107329311061354 1.20869261255147 0.0315785019498581 0.229 "Fungi" 0.124205658448242 "Recent vs Forest" "C-cycling" "Parent material" 1
+"sample_data(f1)$LDMC11" 1 0.011137992161991 0.627154349158125 -0.0117887827253039 0.636 "Fungi" 0.0128893182728122 "Recent vs Forest" "C-cycling" "LDMC" 1
+"Residual41" 22 0.390710560953186 NA NA NA "Fungi" 0.452145476440557 "Recent vs Forest" "C-cycling" "Residual" 1
+"Total41" 31 0.864125776573046 NA NA NA "Fungi" 1 "Recent vs Forest" "C-cycling" "Total" 1
+"sample_data(f1)$Succession51" 1 0.00958204182659872 0.302163169306751 -0.0255597633918532 0.904 "Fungi" 0.00940889947417657 "Late vs Forest" "C-cycling" "Succession" 1
+"sample_data(f1)$pH21" 1 0.0127401474981124 0.401751882858518 -0.0218324769780768 0.802 "Fungi" 0.0125099398713929 "Late vs Forest" "C-cycling" "pH" 1
+"sample_data(f1)$C.N21" 1 0.0683288282117633 2.15470310619712 0.0396060663691573 0.103 "Fungi" 0.0670941629630694 "Late vs Forest" "C-cycling" "C:N" 1
+"sample_data(f1)$Parent_material21" 6 0.115987694809837 0.609598839484597 -0.0912948833401069 0.826 "Fungi" 0.113891859423725 "Late vs Forest" "C-cycling" "Parent material" 1
+"sample_data(f1)$LDMC21" 1 0.0175954213030496 0.554859638731532 -0.0161546952916709 0.607 "Fungi" 0.0172774814848563 "Late vs Forest" "C-cycling" "LDMC" 1
+"Residual51" 17 0.539095189615284 NA NA NA "Fungi" 0.529354028910855 "Late vs Forest" "C-cycling" "Residual" 1
+"Total51" 27 1.01840197707472 NA NA NA "Fungi" 1 "Late vs Forest" "C-cycling" "Total" 1
+"sample_data(f1)$Succession7" 1 0.0745325573609712 4.45829617278681 0.0975313691310682 0.001 "Fungi" 0.129382374288945 "Managed vs Forest" "P-cycling" "Succession" 0
+"Residual7" 30 0.501531669088611 NA NA NA "Fungi" 0.870617625711055 "Managed vs Forest" "P-cycling" "Residual" 0
+"Total7" 31 0.576064226449582 NA NA NA "Fungi" 1 "Managed vs Forest" "P-cycling" "Total" 0
+"sample_data(f1)$Succession12" 1 0.0600720267971386 2.92833797143738 0.0536717833418953 0.007 "Fungi" 0.0838384572959648 "Recent vs Forest" "P-cycling" "Succession" 0
+"Residual12" 32 0.656449110812462 NA NA NA "Fungi" 0.916161542704035 "Recent vs Forest" "P-cycling" "Residual" 0
+"Total12" 33 0.716521137609601 NA NA NA "Fungi" 1 "Recent vs Forest" "P-cycling" "Total" 0
+"sample_data(f1)$Succession22" 1 0.0484043272426332 2.01119057156108 0.034855190415809 0.075 "Fungi" 0.0717995390600421 "Late vs Forest" "P-cycling" "Succession" 0
+"Residual22" 26 0.625754976233609 NA NA NA "Fungi" 0.928200460939958 "Late vs Forest" "P-cycling" "Residual" 0
+"Total22" 27 0.674159303476242 NA NA NA "Fungi" 1 "Late vs Forest" "P-cycling" "Total" 0
+"sample_data(f1)$Succession32" 1 0.0259612007910933 1.80485801374886 0.0245347202359947 0.042 "Fungi" 0.0450665040443463 "Managed vs Forest" "P-cycling" "Succession" 1
+"sample_data(f1)$pH4" 1 0.038013881444415 2.64277677718936 0.0488299996183192 0.006 "Fungi" 0.0659889639019999 "Managed vs Forest" "P-cycling" "pH" 1
+"sample_data(f1)$C.N4" 1 0.0257688475462385 1.79148535436224 0.0241369168187726 0.039 "Fungi" 0.0447325946710107 "Managed vs Forest" "P-cycling" "C:N" 1
+"sample_data(f1)$Parent_material4" 5 0.0780555029181798 1.08530496021899 0.013153577317066 0.3 "Fungi" 0.1354979173056 "Managed vs Forest" "P-cycling" "Parent material" 1
+"sample_data(f1)$LDMC4" 1 0.0147325288021566 1.02422545418164 0.000756472758921168 0.399 "Fungi" 0.0255744552876624 "Managed vs Forest" "P-cycling" "LDMC" 1
+"Residual32" 22 0.316449500765841 NA NA NA "Fungi" 0.549330241727025 "Managed vs Forest" "P-cycling" "Residual" 1
+"Total32" 31 0.576064226449582 NA NA NA "Fungi" 1 "Managed vs Forest" "P-cycling" "Total" 1
+"sample_data(f1)$Succession42" 1 0.00928793864958438 0.514277428721943 -0.0154127782995073 0.886 "Fungi" 0.0138094325963289 "Recent vs Forest" "P-cycling" "Succession" 1
+"sample_data(f1)$pH12" 1 0.0666006128284084 3.68770652013644 0.0774829698981743 0.001 "Fungi" 0.099022690440495 "Recent vs Forest" "P-cycling" "pH" 1
+"sample_data(f1)$C.N12" 1 0.0264398545485692 1.46398688945138 0.0142923569748652 0.152 "Fungi" 0.0393111327518883 "Recent vs Forest" "P-cycling" "C:N" 1
+"sample_data(f1)$Parent_material12" 5 0.0704586179540441 0.78026520716368 -0.0355542659531214 0.849 "Fungi" 0.104758824554725 "Recent vs Forest" "P-cycling" "Parent material" 1
+"sample_data(f1)$LDMC12" 1 0.00697325715224734 0.38611245114492 -0.019559209501038 0.976 "Fungi" 0.0103679328916688 "Recent vs Forest" "P-cycling" "LDMC" 1
+"Residual42" 22 0.397323776776785 NA NA NA "Fungi" 0.59074635625025 "Recent vs Forest" "P-cycling" "Residual" 1
+"Total42" 31 0.672579310177703 NA NA NA "Fungi" 1 "Recent vs Forest" "P-cycling" "Total" 1
+"sample_data(f1)$Succession52" 1 0.0140101119389505 0.644585267384024 -0.0128565767646117 0.735 "Fungi" 0.0207816043874328 "Late vs Forest" "P-cycling" "Succession" 1
+"sample_data(f1)$pH22" 1 0.0315786673452243 1.45288944321435 0.0159171687683326 0.168 "Fungi" 0.0468415509248211 "Late vs Forest" "P-cycling" "pH" 1
+"sample_data(f1)$C.N22" 1 0.0318033724336987 1.46322780383331 0.0162746055024344 0.185 "Fungi" 0.0471748624838484 "Late vs Forest" "P-cycling" "C:N" 1
+"sample_data(f1)$Parent_material22" 6 0.12324206957808 0.945031973074277 -0.0119192582212636 0.546 "Fungi" 0.182808527513592 "Late vs Forest" "P-cycling" "Parent material" 1
+"sample_data(f1)$LDMC22" 1 0.0219152515052256 1.008289463556 0.000295964648851097 0.379 "Fungi" 0.0325075266220039 "Late vs Forest" "P-cycling" "LDMC" 1
+"Residual52" 17 0.36949634906915 NA NA NA "Fungi" 0.548084625049117 "Late vs Forest" "P-cycling" "Residual" 1
+"Total52" 27 0.674159303476242 NA NA NA "Fungi" 1 "Late vs Forest" "P-cycling" "Total" 1
+"sample_data(f1)$Succession8" 1 4.44225383091787 30.2831218583221 0.241444328028837 0.001 "Bacteria" 0.251765346546224 "Managed vs Forest" "Taxonomic" "Succession" 0
+"Residual8" 90 13.2021674202899 NA NA NA "Bacteria" 0.748234653453776 "Managed vs Forest" "Taxonomic" "Residual" 0
+"Total8" 91 17.6444212512077 NA NA NA "Bacteria" 1 "Managed vs Forest" "Taxonomic" "Total" 0
+"sample_data(f1)$Succession13" 1 2.05506979333334 11.6331628905023 0.17536876493982 0.001 "Bacteria" 0.195078750256178 "Recent vs Forest" "Taxonomic" "Succession" 0
+"Residual13" 48 8.47949530222222 NA NA NA "Bacteria" 0.804921249743822 "Recent vs Forest" "Taxonomic" "Residual" 0
+"Total13" 49 10.5345650955556 NA NA NA "Bacteria" 1 "Recent vs Forest" "Taxonomic" "Total" 0
+"sample_data(f1)$Succession23" 1 1.3248452089947 6.46844806999653 0.115201745419037 0.001 "Bacteria" 0.139200862922148 "Late vs Forest" "Taxonomic" "Succession" 0
+"Residual23" 40 8.19266194708995 NA NA NA "Bacteria" 0.860799137077851 "Late vs Forest" "Taxonomic" "Residual" 0
+"Total23" 41 9.51750715608466 NA NA NA "Bacteria" 1 "Late vs Forest" "Taxonomic" "Total" 0
+"sample_data(f1)$Succession33" 1 0.187652427504377 1.58357372315556 0.00644237911101962 0.125 "Bacteria" 0.0110089714029754 "Managed vs Forest" "Taxonomic" "Succession" 1
+"sample_data(f1)$pH5" 1 1.18979887285565 10.0405534633991 0.0912813301951112 0.001 "Bacteria" 0.0698017176796432 "Managed vs Forest" "Taxonomic" "pH" 1
+"sample_data(f1)$C.N5" 1 0.258033990883497 2.17751431771133 0.0129145253248322 0.068 "Bacteria" 0.0151380339940754 "Managed vs Forest" "Taxonomic" "C:N" 1
+"sample_data(f1)$Parent_material5" 9 1.18453299447533 1.11067949116143 0.0109467905948539 0.242 "Bacteria" 0.0694927853345013 "Managed vs Forest" "Taxonomic" "Parent material" 1
+"sample_data(f1)$LDMC5" 1 0.164734243202526 1.39017023285432 0.00431651176061735 0.173 "Bacteria" 0.00966443438342996 "Managed vs Forest" "Taxonomic" "LDMC" 1
+"Residual33" 76 9.00594919061538 NA NA NA "Bacteria" 0.528350410462031 "Managed vs Forest" "Taxonomic" "Residual" 1
+"Total33" 89 17.0454096604938 NA NA NA "Bacteria" 1 "Managed vs Forest" "Taxonomic" "Total" 1
+"sample_data(f1)$Succession43" 1 0.110028675239891 0.866374373050765 -0.00285120470138336 0.464 "Bacteria" 0.0111871648647474 "Recent vs Forest" "Taxonomic" "Succession" 1
+"sample_data(f1)$pH13" 1 0.768401490651486 6.05045328650011 0.0970299578122984 0.002 "Bacteria" 0.0781272167413974 "Recent vs Forest" "Taxonomic" "pH" 1
+"sample_data(f1)$C.N13" 1 0.221958134882176 1.74771567078128 0.0156597160780791 0.102 "Bacteria" 0.0225675919716835 "Recent vs Forest" "Taxonomic" "C:N" 1
+"sample_data(f1)$Parent_material13" 7 1.16664577548782 1.31232283650067 0.0444485891370341 0.084 "Bacteria" 0.118618701903732 "Recent vs Forest" "Taxonomic" "Parent material" 1
+"sample_data(f1)$LDMC13" 1 0.122033568858043 0.960901841997297 -0.000832568295520629 0.402 "Bacteria" 0.0124077623480598 "Recent vs Forest" "Taxonomic" "LDMC" 1
+"Residual43" 35 4.44496484797404 NA NA NA "Bacteria" 0.451941773032125 "Recent vs Forest" "Taxonomic" "Residual" 1
+"Total43" 46 9.83526001182033 NA NA NA "Bacteria" 1 "Recent vs Forest" "Taxonomic" "Total" 1
+"sample_data(f1)$Succession53" 1 0.113401459926433 0.733045814753676 -0.00671869421969152 0.66 "Bacteria" 0.012391273859651 "Late vs Forest" "Taxonomic" "Succession" 1
+"sample_data(f1)$pH23" 1 1.28177918898938 8.28563292339073 0.154077094308846 0.001 "Bacteria" 0.14005884023603 "Late vs Forest" "Taxonomic" "pH" 1
+"sample_data(f1)$C.N23" 1 0.360990108143688 2.33349983425149 0.0322619628049612 0.032 "Bacteria" 0.0394450591159527 "Late vs Forest" "Taxonomic" "C:N" 1
+"sample_data(f1)$Parent_material23" 7 1.12135422202195 1.03551705323574 0.00617709070585245 0.374 "Bacteria" 0.122529350748783 "Late vs Forest" "Taxonomic" "Parent material" 1
+"sample_data(f1)$LDMC23" 1 0.166917460105371 1.07898210145561 0.00197066136199951 0.358 "Bacteria" 0.0182389182772851 "Late vs Forest" "Taxonomic" "LDMC" 1
+"Residual53" 28 4.331572207403 NA NA NA "Bacteria" 0.473306935374586 "Late vs Forest" "Taxonomic" "Residual" 1
+"Total53" 39 9.15171928333334 NA NA NA "Bacteria" 1 "Late vs Forest" "Taxonomic" "Total" 1
+"sample_data(f1)$Succession9" 1 0.0163324464215348 11.9457180274825 0.254873326846647 0.001 "Bacteria" 0.284789928250977 "Managed vs Forest" "C-cycling" "Succession" 0
+"Residual9" 30 0.0410166547978785 NA NA NA "Bacteria" 0.715210071749021 "Managed vs Forest" "C-cycling" "Residual" 0
+"Total9" 31 0.0573491012194134 NA NA NA "Bacteria" 1 "Managed vs Forest" "C-cycling" "Total" 0
+"sample_data(f1)$Succession14" 1 0.00875846026769708 2.9808388027413 0.0550526021252842 0.015 "Bacteria" 0.0852134741408118 "Recent vs Forest" "C-cycling" "Succession" 0
+"Residual14" 32 0.0940241143897342 NA NA NA "Bacteria" 0.914786525859188 "Recent vs Forest" "C-cycling" "Residual" 0
+"Total14" 33 0.102782574657431 NA NA NA "Bacteria" 1 "Recent vs Forest" "C-cycling" "Total" 0
+"sample_data(f1)$Succession24" 1 0.00899790541228244 2.80277840084908 0.0604902796847196 0.036 "Bacteria" 0.0973093068259852 "Late vs Forest" "C-cycling" "Succession" 0
+"Residual24" 26 0.08346915355437 NA NA NA "Bacteria" 0.902690693174015 "Late vs Forest" "C-cycling" "Residual" 0
+"Total24" 27 0.0924670589666524 NA NA NA "Bacteria" 1 "Late vs Forest" "C-cycling" "Total" 0
+"sample_data(f1)$Succession34" 1 0.00430331852545915 4.15114490811521 0.0896455838451997 0.008 "Bacteria" 0.075037244419838 "Managed vs Forest" "C-cycling" "Succession" 1
+"sample_data(f1)$pH6" 1 0.00493025478204212 4.75591149321235 0.105043091795474 0.004 "Bacteria" 0.0859691726149173 "Managed vs Forest" "C-cycling" "pH" 1
+"sample_data(f1)$C.N6" 1 0.0010469855919197 1.00996216827889 0.000311220870131544 0.368 "Bacteria" 0.0182563557171368 "Managed vs Forest" "C-cycling" "C:N" 1
+"sample_data(f1)$Parent_material6" 5 0.00360839283235404 0.696158624739854 -0.0498414483552111 0.864 "Bacteria" 0.0629197800075122 "Managed vs Forest" "C-cycling" "Parent material" 1
+"sample_data(f1)$LDMC6" 1 0.00148659601791429 1.4340271243414 0.0133818450196605 0.212 "Bacteria" 0.0259218712465377 "Managed vs Forest" "C-cycling" "LDMC" 1
+"Residual34" 22 0.0228064810204582 NA NA NA "Bacteria" 0.39767808972633 "Managed vs Forest" "C-cycling" "Residual" 1
+"Total34" 31 0.0573491012194134 NA NA NA "Bacteria" 1 "Managed vs Forest" "C-cycling" "Total" 1
+"sample_data(f1)$Succession44" 1 0.000762771186030117 0.339804843112261 -0.0210657073390434 0.899 "Bacteria" 0.008195865792027 "Recent vs Forest" "C-cycling" "Succession" 1
+"sample_data(f1)$pH14" 1 0.00959202665546065 4.27312564040501 0.0927937510776102 0.007 "Bacteria" 0.103064935568498 "Recent vs Forest" "C-cycling" "pH" 1
+"sample_data(f1)$C.N14" 1 0.00234288984019163 1.04372756752795 0.00136462174807232 0.351 "Bacteria" 0.0251740116136951 "Recent vs Forest" "C-cycling" "C:N" 1
+"sample_data(f1)$Parent_material14" 5 0.00846211927001417 0.753953259799951 -0.039981899408844 0.681 "Bacteria" 0.0909242445485129 "Recent vs Forest" "C-cycling" "Parent material" 1
+"sample_data(f1)$LDMC14" 1 0.00308734075980527 1.37537096541334 0.0115943371217073 0.222 "Bacteria" 0.0331730287995168 "Recent vs Forest" "C-cycling" "LDMC" 1
+"Residual44" 22 0.0493841286632829 NA NA NA "Bacteria" 0.530625301785429 "Recent vs Forest" "C-cycling" "Residual" 1
+"Total44" 31 0.0930677984956936 NA NA NA "Bacteria" 1 "Recent vs Forest" "C-cycling" "Total" 1
+"sample_data(f1)$Succession54" 1 0.00150193862971483 0.459779060917959 -0.0196731713639644 0.763 "Bacteria" 0.0162429588060813 "Late vs Forest" "C-cycling" "Succession" 1
+"sample_data(f1)$pH24" 1 0.00250964941185588 0.76826324790347 -0.00834538156123344 0.512 "Bacteria" 0.027141010430114 "Late vs Forest" "C-cycling" "pH" 1
+"sample_data(f1)$C.N24" 1 0.00300197954949002 0.918977187783965 -0.00290206950172539 0.387 "Bacteria" 0.0324653945203628 "Late vs Forest" "C-cycling" "C:N" 1
+"sample_data(f1)$Parent_material24" 6 0.00891620161307788 0.45491015450639 -0.13225274431218 0.968 "Bacteria" 0.0964257078436272 "Late vs Forest" "C-cycling" "Parent material" 1
+"sample_data(f1)$LDMC24" 1 0.00379625601428362 1.16212406467159 0.00575681238742104 0.286 "Bacteria" 0.0410552261173648 "Late vs Forest" "C-cycling" "LDMC" 1
+"Residual54" 17 0.0555331002985978 NA NA NA "Bacteria" 0.600571716232755 "Late vs Forest" "C-cycling" "Residual" 1
+"Total54" 27 0.0924670589666524 NA NA NA "Bacteria" 1 "Late vs Forest" "C-cycling" "Total" 1
+"sample_data(f1)$Succession10" 1 0.0134802801560118 8.02110234286411 0.17993090715819 0.001 "Bacteria" 0.210964486787678 "Managed vs Forest" "P-cycling" "Succession" 0
+"Residual10" 30 0.0504180581912325 NA NA NA "Bacteria" 0.789035513212321 "Managed vs Forest" "P-cycling" "Residual" 0
+"Total10" 31 0.0638983383472444 NA NA NA "Bacteria" 1 "Managed vs Forest" "P-cycling" "Total" 0
+"sample_data(f1)$Succession15" 1 0.0117972941799664 4.24598667969049 0.0871499715554713 0.001 "Bacteria" 0.117143636265518 "Recent vs Forest" "P-cycling" "Succession" 0
+"Residual15" 32 0.0889106448601588 NA NA NA "Bacteria" 0.882856363734482 "Recent vs Forest" "P-cycling" "Residual" 0
+"Total15" 33 0.100707939040125 NA NA NA "Bacteria" 1 "Recent vs Forest" "P-cycling" "Total" 0
+"sample_data(f1)$Succession25" 1 0.0106926924007766 3.47600946137043 0.0812445430071439 0.007 "Bacteria" 0.117926731768962 "Late vs Forest" "P-cycling" "Succession" 0
+"Residual25" 26 0.0799796449088448 NA NA NA "Bacteria" 0.882073268231037 "Late vs Forest" "P-cycling" "Residual" 0
+"Total25" 27 0.0906723373096215 NA NA NA "Bacteria" 1 "Late vs Forest" "P-cycling" "Total" 0
+"sample_data(f1)$Succession35" 1 0.0048582031519232 4.1190576121104 0.0888138185984474 0.006 "Bacteria" 0.0760301954257737 "Managed vs Forest" "P-cycling" "Succession" 1
+"sample_data(f1)$pH7" 1 0.00632836846095229 5.3655463689298 0.120046219700405 0.001 "Bacteria" 0.0990380755531054 "Managed vs Forest" "P-cycling" "pH" 1
+"sample_data(f1)$C.N7" 1 0.00115916247788624 0.982803081489075 -0.000537692661494006 0.404 "Bacteria" 0.0181407296006192 "Managed vs Forest" "P-cycling" "C:N" 1
+"sample_data(f1)$Parent_material7" 5 0.00569529959908992 0.96575900320652 -0.00537893388301891 0.507 "Bacteria" 0.0891306369837006 "Managed vs Forest" "P-cycling" "Parent material" 1
+"sample_data(f1)$LDMC7" 1 0.00161330383217072 1.3678496396181 0.0113646610359885 0.212 "Bacteria" 0.0252479778645182 "Managed vs Forest" "P-cycling" "LDMC" 1
+"Residual35" 22 0.0259477966581658 NA NA NA "Bacteria" 0.40607936496184 "Managed vs Forest" "P-cycling" "Residual" 1
+"Total35" 31 0.0638983383472444 NA NA NA "Bacteria" 1 "Managed vs Forest" "P-cycling" "Total" 1
+"sample_data(f1)$Succession45" 1 0.000938819259606587 0.426764550332933 -0.0182403584291656 0.86 "Bacteria" 0.0100339954344078 "Recent vs Forest" "P-cycling" "Succession" 1
+"sample_data(f1)$pH15" 1 0.0089767128984023 4.0805967755283 0.0878148338022936 0.004 "Bacteria" 0.0959421052741329 "Recent vs Forest" "P-cycling" "pH" 1
+"sample_data(f1)$C.N15" 1 0.00229839613528923 1.04479534599098 0.00139789770873308 0.42 "Bacteria" 0.0245650012949425 "Recent vs Forest" "P-cycling" "C:N" 1
+"sample_data(f1)$Parent_material15" 5 0.0105647741791862 0.960498212156141 -0.00621048643145018 0.495 "Bacteria" 0.112915126947786 "Recent vs Forest" "P-cycling" "Parent material" 1
+"sample_data(f1)$LDMC15" 1 0.00196694782695783 0.894126953948258 -0.00331951541437743 0.454 "Bacteria" 0.021022518779263 "Recent vs Forest" "P-cycling" "LDMC" 1
+"Residual45" 22 0.0483967651371981 NA NA NA "Bacteria" 0.517259222643398 "Recent vs Forest" "P-cycling" "Residual" 1
+"Total45" 31 0.0935638515827162 NA NA NA "Bacteria" 1 "Recent vs Forest" "P-cycling" "Total" 1
+"sample_data(f1)$Succession55" 1 0.00199855626658944 0.679375845893899 -0.0115835037571363 0.604 "Bacteria" 0.0220415214374028 "Late vs Forest" "P-cycling" "Succession" 1
+"sample_data(f1)$pH25" 1 0.00256972649841584 0.873535633078007 -0.0045370766230286 0.456 "Bacteria" 0.0283407991308409 "Late vs Forest" "P-cycling" "pH" 1
+"sample_data(f1)$C.N25" 1 0.0032163937700752 1.09335937886886 0.00332318316260484 0.324 "Bacteria" 0.0354727126873557 "Late vs Forest" "P-cycling" "C:N" 1
+"sample_data(f1)$Parent_material25" 6 0.0109084302552833 0.618023132994273 -0.0891492464719276 0.912 "Bacteria" 0.120306044588152 "Late vs Forest" "P-cycling" "Parent material" 1
+"sample_data(f1)$LDMC25" 1 0.00584833428048024 1.9880436269387 0.0340845225588287 0.096 "Bacteria" 0.0644996528600532 "Late vs Forest" "P-cycling" "LDMC" 1
+"Residual55" 17 0.050009809352755 NA NA NA "Bacteria" 0.551544283919637 "Late vs Forest" "P-cycling" "Residual" 1
+"Total55" 27 0.0906723373096215 NA NA NA "Bacteria" 1 "Late vs Forest" "P-cycling" "Total" 1
+"sample_data(f1)$Succession16" 1 0.261906303669069 18.8709796395185 0.358344266920261 0.001 "Bacteria" 0.386138763305225 "Managed vs Forest" "P-cycling" "Succession" 0
+"Residual16" 30 0.416363604866489 NA NA NA "Bacteria" 0.613861236694774 "Managed vs Forest" "P-cycling" "Residual" 0
+"Total16" 31 0.678269908535559 NA NA NA "Bacteria" 1 "Managed vs Forest" "P-cycling" "Total" 0
+"sample_data(f1)$Succession17" 1 0.20114683232251 9.20844349498275 0.194473968128165 0.002 "Bacteria" 0.223460114335643 "Recent vs Forest" "P-cycling" "Succession" 0
+"Residual17" 32 0.698999634175677 NA NA NA "Bacteria" 0.776539885664357 "Recent vs Forest" "P-cycling" "Residual" 0
+"Total17" 33 0.900146466498187 NA NA NA "Bacteria" 1 "Recent vs Forest" "P-cycling" "Total" 0
+"sample_data(f1)$Succession26" 1 0.248466318478334 13.0307192450569 0.300537174248811 0.001 "Bacteria" 0.333858035339873 "Late vs Forest" "P-cycling" "Succession" 0
+"Residual26" 26 0.495761144027969 NA NA NA "Bacteria" 0.666141964660126 "Late vs Forest" "P-cycling" "Residual" 0
+"Total26" 27 0.744227462506304 NA NA NA "Bacteria" 1 "Late vs Forest" "P-cycling" "Total" 0
+"sample_data(f1)$Succession36" 1 0.0361789556417167 3.76549062801109 0.0795470041715129 0.026 "Bacteria" 0.0533400570870527 "Managed vs Forest" "P-cycling" "Succession" 1
+"sample_data(f1)$pH8" 1 0.0377728398352689 3.93138143073054 0.0839182795144678 0.022 "Bacteria" 0.0556899832351749 "Managed vs Forest" "P-cycling" "pH" 1
+"sample_data(f1)$C.N8" 1 0.0212616077523729 2.21289927550295 0.0365189219237343 0.113 "Bacteria" 0.0313468244496922 "Managed vs Forest" "P-cycling" "C:N" 1
+"sample_data(f1)$Parent_material8" 5 0.0526730999218131 1.0964388583687 0.0148448804754729 0.382 "Bacteria" 0.077658022652868 "Managed vs Forest" "P-cycling" "Parent material" 1
+"sample_data(f1)$LDMC8" 1 0.00781342213666386 0.813217720258828 -0.00587121621533518 0.47 "Bacteria" 0.0115196355290679 "Managed vs Forest" "P-cycling" "LDMC" 1
+"Residual36" 22 0.211376710964801 NA NA NA "Bacteria" 0.311640997639393 "Managed vs Forest" "P-cycling" "Residual" 1
+"Total36" 31 0.678269908535559 NA NA NA "Bacteria" 1 "Managed vs Forest" "P-cycling" "Total" 1
+"sample_data(f1)$Succession46" 1 0.0152095081122212 1.11134452910108 0.00346745147965313 0.307 "Bacteria" 0.0174997817085008 "Recent vs Forest" "P-cycling" "Succession" 1
+"sample_data(f1)$pH16" 1 0.0729117193122998 5.32759112044975 0.119126839599712 0.011 "Bacteria" 0.083890889997388 "Recent vs Forest" "P-cycling" "pH" 1
+"sample_data(f1)$C.N16" 1 0.0345230680768692 2.5225682876742 0.0454192016139179 0.084 "Bacteria" 0.0397216103765695 "Recent vs Forest" "P-cycling" "C:N" 1
+"sample_data(f1)$Parent_material16" 5 0.0657666530584267 0.96110156271316 -0.00611504735513901 0.518 "Bacteria" 0.0756699075163645 "Recent vs Forest" "P-cycling" "Parent material" 1
+"sample_data(f1)$LDMC16" 1 0.011057560774843 0.807965621350382 -0.0060373046467555 0.444 "Bacteria" 0.0127226270804082 "Recent vs Forest" "P-cycling" "LDMC" 1
+"Residual46" 22 0.301085009829955 NA NA NA "Bacteria" 0.346422902624466 "Recent vs Forest" "P-cycling" "Residual" 1
+"Total46" 31 0.869125590568535 NA NA NA "Bacteria" 1 "Recent vs Forest" "P-cycling" "Total" 1
+"sample_data(f1)$Succession56" 1 0.0104712423349004 1.01277759737723 0.000456134609744086 0.362 "Bacteria" 0.0140699488562769 "Late vs Forest" "P-cycling" "Succession" 1
+"sample_data(f1)$pH26" 1 0.0253738980020379 2.45416108544709 0.0493703107424632 0.107 "Bacteria" 0.0340942780001523 "Late vs Forest" "P-cycling" "pH" 1
+"sample_data(f1)$C.N26" 1 0.0500997153277273 4.84563986737121 0.120758756407072 0.009 "Bacteria" 0.0673177460544235 "Late vs Forest" "P-cycling" "C:N" 1
+"sample_data(f1)$Parent_material26" 6 0.0800715228259456 1.29075172286721 0.0586498253770652 0.244 "Bacteria" 0.107590121112021 "Late vs Forest" "P-cycling" "Parent material" 1
+"sample_data(f1)$LDMC26" 1 0.0460557888462322 4.45451166931125 0.109825633461723 0.012 "Bacteria" 0.0618840222465482 "Late vs Forest" "P-cycling" "LDMC" 1
+"Residual56" 17 0.175765261943293 NA NA NA "Bacteria" 0.236171427148597 "Late vs Forest" "P-cycling" "Residual" 1
+"Total56" 27 0.744227462506304 NA NA NA "Bacteria" 1 "Late vs Forest" "P-cycling" "Total" 1
