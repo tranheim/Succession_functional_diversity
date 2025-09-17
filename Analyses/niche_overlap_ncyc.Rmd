@@ -1,0 +1,240 @@
+---
+title: "niche_overlap_cazyme_ver1"
+author: "Tord Ranheim"
+date: "2024-11-05"
+output: html_document
+---
+
+
+Split by landuse
+
+
+Source:
+https://github.com/DamienFinn/MicroNiche_Vignette/blob/master/MicroNiche_vignette.pdf
+
+Note on correcting for unequal sequencing depth:
+The use of rarefaction to normalise sequence depth prior to niche breadth analyses is emphatically recommended to improve the accuracy of taxa comparisons between samples and reduce the occurrence of Type I specialist taxa Errors.
+Source: https://academic.oup.com/femsec/article/96/8/fiaa131/5863182
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dev = "png",
+                      dpi=300,
+                      echo=F,
+                      cache=T, echo=T)
+```
+
+
+```{r}
+rm(list=ls())
+```
+
+
+Libraries
+```{r}
+library(stringr)
+library(dplyr)
+library(tidyverse)
+library(phyloseq)
+library(metagMisc)
+library(MicroNiche)
+```
+
+
+Data loading
+```{r Load phyloseq object}
+
+#bacteria
+ps_bacteria = readRDS("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Microbial/Metagenome/Processing/Ncyc/Results/ps_ncyc_bac_rar.RDS")
+
+```
+
+
+```{r Load metadata file}
+
+metadata = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Metadata/Result/metadata.txt")
+row.names(metadata) = metadata$Sample
+
+```
+
+
+```{r Load mapping file}
+
+map = read.table("/Users/tranheim/Desktop/Databases/Bacteria/Genes/Ncyc/Custom database/kegg_ncyc.txt")
+```
+
+
+                                      PREPARE DATAFRAMES
+###################################################################################################
+
+```{r Split phyloseq}
+
+f1 = ps_bacteria %>% phyloseq_sep_variable("Succession")
+
+```
+
+
+                              CALCULATE LEVIN'S NICHE OVERLAP
+###################################################################################################
+
+```{r niche overlap managed}
+
+#Calculate niche overlap
+z1 = as.data.frame(as.matrix(f1[["Managed"]]@otu_table))
+z1$KO = row.names(z1)
+z1 = z1[,c(dim(z1)[2],1:dim(z1)[2]-1)]
+z2 = levins.overlap(z1)
+
+#Subset to significant genes only
+names = z2$LO1.2
+rows <- grep("\\*", z2[,1], invert = TRUE)
+z2 = z2[rows,]
+z2 = z2[z2$LO1.2]
+names = z2$LO1.2
+row.names(z2) = names(z2)
+lno_bacteria_managed = z2
+
+#Write results
+write.table(lno_bacteria_managed, file = "lno_bacteria_managed.txt")
+
+
+#Split by substrate groups
+z1 = lno_bacteria_managed
+names = row.names(z1)
+v1 = melt(z1) %>% filter(value < 1)
+v1$variable <- map$Pathway[match(v1$variable, map$KO)]
+
+
+#Add grouping info
+v1$Succession = "Managed"
+v1$Sucession_numeric = 1
+v1$Community = "Bacteria"
+
+s1 = v1
+
+```
+
+
+```{r niche overlap recent}
+
+#Calculate niche overlap
+z1 = as.data.frame(as.matrix(f1[["Recent"]]@otu_table))
+z1$KO = row.names(z1)
+z1 = z1[,c(dim(z1)[2],1:dim(z1)[2]-1)]
+z2 = levins.overlap(z1)
+
+#Subset to significant genes only
+names = z2$LO1.2
+rows <- grep("\\*", z2[,1], invert = TRUE)
+z2 = z2[rows,]
+z2 = z2[z2$LO1.2]
+names = z2$LO1.2
+row.names(z2) = names(z2)
+lno_bacteria_recent = z2
+
+#Write results
+write.table(lno_bacteria_recent, file = "lno_bacteria_recent.txt")
+
+
+#Split by substrate groups
+z1 = lno_bacteria_recent
+names = row.names(z1)
+v1 = melt(z1) %>% filter(value < 1)
+v1$variable <- map$Pathway[match(v1$variable, map$KO)]
+
+#Add grouping info
+v1$Succession = "Recent"
+v1$Sucession_numeric = 2
+v1$Community = "Bacteria"
+
+s2 = v1
+```
+
+
+```{r niche overlap late}
+
+#Calculate niche overlap
+z1 = as.data.frame(as.matrix(f1[["Late"]]@otu_table))
+z1$KO = row.names(z1)
+z1 = z1[,c(dim(z1)[2],1:dim(z1)[2]-1)]
+z2 = levins.overlap(z1)
+
+#Subset to significant genes only
+names = z2$LO1.2
+rows <- grep("\\*", z2[,1], invert = TRUE)
+z2 = z2[rows,]
+z2 = z2[z2$LO1.2]
+names = z2$LO1.2
+row.names(z2) = names(z2)
+lno_bacteria_late = z2
+
+#Write results
+write.table(lno_bacteria_late, file = "lno_bacteria_late.txt")
+
+
+#Split by substrate groups
+z1 = lno_bacteria_late
+names = row.names(z1)
+v1 = melt(z1) %>% filter(value < 1)
+v1$variable <- map$Pathway[match(v1$variable, map$KO)]
+
+
+#Add grouping info
+v1$Succession = "Late"
+v1$Sucession_numeric = 3
+v1$Community = "Bacteria"
+
+s3 = v1
+
+```
+
+
+
+```{r niche overlap forest bacteria}
+
+#Calculate niche overlap
+z1 = as.data.frame(as.matrix(f1[["Forest"]]@otu_table))
+z1$KO = row.names(z1)
+z1 = z1[,c(dim(z1)[2],1:dim(z1)[2]-1)]
+z2 = levins.overlap(z1)
+
+#Subset to significant genes only
+names = z2$LO1.2
+rows <- grep("\\*", z2[,1], invert = TRUE)
+z2 = z2[rows,]
+z2 = z2[z2$LO1.2]
+names = z2$LO1.2
+row.names(z2) = names(z2)
+lno_bacteria_forest = z2
+
+#Write results
+write.table(lno_bacteria_forest, file = "lno_bacteria_forest.txt")
+
+
+#Split by substrate groups
+z1 = lno_bacteria_forest
+names = row.names(z1)
+v1 = melt(z1) %>% filter(value < 1)
+v1$variable <- map$Pathway[match(v1$variable, map$KO)]
+
+#Add grouping info
+v1$Succession = "Forest"
+v1$Sucession_numeric = 4
+v1$Community = "Bacteria"
+
+s4 = v1
+
+```
+
+
+
+```{r Merge and write}
+
+res_lno = rbind(s1,s2,s3,s4)
+write.table(res_lno, file = "res_lno_ncyc.txt")
+
+```
+
+
+
+
