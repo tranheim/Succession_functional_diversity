@@ -1,0 +1,140 @@
+---
+title: "ad"
+author: "Tord Ranheim"
+date: "2025-04-22"
+output:
+  html_document:
+    keep_md: no
+---
+
+
+Alpha diversity for soil bacteria and fungi
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dev = "png",
+                      dpi=300,
+                      echo=F,
+                      cache=T, echo=T)
+```
+
+
+
+###loading requisite libraries 
+```{r libraries to load}
+library(tidyverse)
+library(rmarkdown)
+library(knitr)
+library(magrittr)
+library(ggplot2)
+library(RColorBrewer)
+library(ggpubr)
+library(ggsci)
+library(dplyr)
+library(phyloseq)
+library(phylosmith)
+library(microbiome)
+library(vegan)
+library(metagMisc)
+library(ape)
+library(microViz)
+
+```
+
+
+##Clear the directory and set pathway
+```{r}
+rm(list=ls())
+
+```
+
+
+Data loading
+```{r Load phyloseq objects}
+
+#Soil fungi
+ps_fungi = readRDS("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Microbial/Amplicon/Soil/ITS/Processing/Results/ps_fungi_srs.RDS")
+
+#Soil bacteria
+ps_bacteria = readRDS("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Microbial/Amplicon/Soil/16S/Processing/Results/ps_bacteria_srs.RDS")
+
+
+#CAZymes
+ps_caz_bac = readRDS("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Microbial/Metagenome/Processing/CAZymes/Results/ps_caz_bac_rar.RDS")
+ps_caz_fun = readRDS("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Microbial/Metagenome/Processing/CAZymes/Results/ps_caz_fun_rar.RDS")
+
+
+#P-cyc
+ps_pcyc_bac = readRDS("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Microbial/Metagenome/Processing/Pcyc/Results/ps_pcyc_bac_rar.RDS")
+ps_pcyc_fun = readRDS("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Microbial/Metagenome/Processing/Pcyc/Results/ps_pcyc_fun_rar.RDS")
+
+#N-cyc
+ps_ncyc_bac = readRDS("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Microbial/Metagenome/Processing/Ncyc/Results/ps_ncyc_bac_rar.RDS")
+
+
+
+```
+
+
+```{r Load metadata file}
+
+metadata = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Metadata/Result/metadata.txt")
+row.names(metadata) = metadata$Sample
+
+```
+
+
+                                  
+                                        ESTIMATE DIVERSITY
+###################################################################################################
+
+We estimate both shannon diversity (accounting for taxon richness and relative abundances), as well observed species richness
+
+```{r Estimate diversities}
+
+#Taxonomic diversity
+s1 = ps_fungi %>% estimate_richness(measures = c("Shannon"))
+s2 = ps_bacteria %>% estimate_richness(measures = c("Shannon"))
+names(s1) = "shannon_fungi"
+s1$Sample = row.names(s1)
+names(s2) = "shannon_bacteria"
+s2$Sample = row.names(s2)
+
+
+#Genetic diversity
+s3 = ps_caz_bac %>% estimate_richness(measures = "Shannon")
+s4 = ps_caz_fun %>% estimate_richness(measures = "Shannon")
+names(s3) = "cazyme_div_bacteria"
+s3$Sample = row.names(s3)
+names(s4) = "cazyme_div_fungi"
+s4$Sample = row.names(s4)
+
+#Pcyc
+s5 = ps_pcyc_bac %>% estimate_richness(measures = "Shannon")
+s6 = ps_pcyc_fun %>% estimate_richness(measures = "Shannon")
+names(s5) = "pcyc_div_bacteria"
+s5$Sample = row.names(s5)
+names(s6) = "pcyc_div_fungi"
+s6$Sample = row.names(s6)
+
+
+#Ncyc
+s7 = ps_ncyc_bac %>% estimate_richness(measures = "Shannon")
+names(s7) = "ncyc_div_bacteria"
+s7$Sample = row.names(s7)
+
+```
+
+```{r Save results}
+
+res = left_join(s2,s1)
+res = left_join(res,s3)
+res = left_join(res,s4)
+res = left_join(res,s5)
+res = left_join(res,s6)
+res = left_join(res,s7)
+
+write.table(res, file = "./results/diversity_results.txt")
+
+```
+
