@@ -1,0 +1,225 @@
+---
+title: "regressions"
+author: "Tord Ranheim"
+date: "2024-10-29"
+output:
+  html_document:
+    keep_md: no
+---
+
+Correlation between alpha diversity and functional diversity
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dev = "png",
+                      dpi=300,
+                      echo=F,
+                      cache=T, echo=T)
+```
+
+
+
+###loading requisite libraries 
+```{r libraries to load}
+library(tidyverse)
+library(rmarkdown)
+library(knitr)
+library(magrittr)
+library(ggplot2)
+library(RColorBrewer)
+library(ggpubr)
+library(ggsci)
+library(dplyr)
+library(phyloseq)
+library(phylosmith)
+library(microbiome)
+library(vegan)
+library(metagMisc)
+library(ape)
+library(microViz)
+
+```
+
+
+
+```{r}
+rm(list=ls())
+
+```
+
+
+                                       LOAD DATA
+###################################################################################################
+
+```{r Load data}
+
+#Load metadata
+metadata = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Metadata/Result/metadata.txt")
+row.names(metadata) = metadata$Sample
+
+#Load diversity estimates
+res = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Revision/diversity/results/diversity_results.txt")
+
+```
+
+
+
+                                        PREPARE DATASET
+###################################################################################################
+```{r Merge data}
+
+metadata = left_join(metadata, res)
+
+rm(res)
+```
+
+
+                                      REGRESSION TESTS
+###################################################################################################
+
+Test results reported in Table S13
+
+```{r fungi c cycling}
+
+#Overall community
+mod = lm(
+  cazyme_div_fungi ~ shannon_fungi,
+  data = metadata
+)
+summ(mod)
+
+#Grasslands
+mod = lm(
+  cazyme_div_fungi ~ shannon_fungi,
+  data = subset(metadata, Ecosystem_type == "Grassland")
+)
+summ(mod)
+
+#Forests
+mod = lm(
+  cazyme_div_fungi ~ shannon_fungi,
+  data = subset(metadata, Ecosystem_type == "Forest")
+)
+summ(mod)
+
+```
+
+
+```{r fungi p cycling}
+
+#Overall community
+mod = lm(
+  pcyc_div_fungi ~ shannon_fungi,
+  data = metadata
+)
+summ(mod)
+
+#Grasslands
+mod = lm(
+  pcyc_div_fungi ~ shannon_fungi,
+  data = subset(metadata, Ecosystem_type == "Grassland")
+)
+summ(mod)
+
+#Forests
+mod = lm(
+  pcyc_div_fungi ~ shannon_fungi,
+  data = subset(metadata, Ecosystem_type == "Forest")
+)
+summ(mod)
+
+```
+
+
+
+```{r bacteria c cycling}
+
+#Overall community
+mod = lm(
+  cazyme_div_bacteria ~ shannon_bacteria + AGS,
+  data = metadata
+)
+summ(mod)
+
+#Grasslands
+mod = lm(
+  cazyme_div_bacteria ~ shannon_bacteria + AGS,
+  data = subset(metadata, Ecosystem_type == "Grassland")
+)
+summ(mod)
+
+#Forests
+mod = lm(
+  cazyme_div_bacteria ~ shannon_bacteria + AGS,
+  data = subset(metadata, Ecosystem_type == "Forest")
+)
+summ(mod)
+
+```
+
+
+
+
+```{r bacteria p cycling}
+
+#Overall community
+mod = lm(
+  pcyc_div_bacteria ~ shannon_bacteria + AGS,
+  data = metadata
+)
+summ(mod)
+
+#Grasslands
+mod = lm(
+  pcyc_div_bacteria ~ shannon_bacteria + AGS,
+  data = subset(metadata, Ecosystem_type == "Grassland")
+)
+summ(mod)
+
+#Forests
+mod = lm(
+  pcyc_div_bacteria ~ shannon_bacteria + AGS,
+  data = subset(metadata, Ecosystem_type == "Forest")
+)
+summ(mod)
+
+```
+
+
+```{r bacteria n cycling}
+
+#Overall community
+mod = lm(
+  ncyc_div_bacteria ~ shannon_bacteria + AGS,
+  data = metadata
+)
+summ(mod)
+
+#Grasslands
+mod = lm(
+  ncyc_div_bacteria ~ shannon_bacteria + AGS,
+  data = subset(metadata, Ecosystem_type == "Grassland")
+)
+summ(mod)
+
+#Forests
+mod = lm(
+  ncyc_div_bacteria ~ shannon_bacteria + AGS,
+  data = subset(metadata, Ecosystem_type == "Forest")
+)
+summ(mod)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
