@@ -1,0 +1,196 @@
+---
+title: "Fig. 4"
+author: "Tord Ranheim"
+date: '2025-06-18"
+output:
+  html_document:
+    keep_md: no
+---
+
+
+Code to reproduce panels in manuscript figure 4
+
+NB! The figure has been manually compiled in pages
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dev = "png",
+                      dpi=300,
+                      echo=F,
+                      cache=T, echo=T)
+```
+
+
+```{r}
+rm(list=ls())
+```
+
+
+Libraries
+```{r}
+library(dplyr)
+library(vegan)
+library(tidyr)
+library(ggplot2)
+library(ggpubr)
+```
+
+
+
+Data loading
+```{r Load data}
+
+#Load metadata
+metadata = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Metadata/Result/metadata.txt")
+row.names(metadata) = metadata$Sample
+
+```
+
+
+
+```{r Load results}
+
+res_diversity = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/MS/Submission/NC/Code/Results/Diversity_results.txt")
+
+```
+
+
+
+                                         PREPARE DATASET
+#############################################################################################
+
+
+```{r}
+
+metadata = left_join(metadata, res_diversity)
+
+```
+
+                                        SET PLOT DETAILS
+#############################################################################################
+
+```{r Set plot details}
+library(ggnewscale)
+
+#Set order of plotting
+metadata$Ecosystem_type = ordered(metadata$Ecosystem_type, levels = c("Grassland","Forest"))
+
+#Set manual color and shape
+farg = c("#fd8d3c","skyblue2")
+shape = c(16,23)
+
+```
+
+                                  REGRESSION PLOTS (Figure 4a-e)
+#############################################################################################
+
+```{r plot 4a}
+
+f2 = metadata %>% 
+  ggplot(aes(x = shannon_fungi, y = cazyme_div_fungi, group = Ecosystem_type)) +
+  geom_point(aes(x= shannon_fungi, y = cazyme_div_fungi, color = Ecosystem_type, shape = Ecosystem_type, fill = Ecosystem_type),  size = 2.5,
+             alpha = 0.8)+
+  geom_smooth(data=subset(metadata, Ecosystem_type == "Forest"),
+               aes(shannon_fungi,cazyme_div_fungi,
+                   color=factor(Ecosystem_type)),
+              method=lm,se=F, fullrange = T,
+              lty = 1, size = 1.6)+
+  scale_color_manual(values = farg, guide = "none")+
+  scale_shape_manual(values = shape, guide = "none")+
+  scale_fill_manual(values = farg, guide = "none")+
+  theme_classic()+
+  labs(y = "", x = "",
+       color = "Land use") +
+ theme(text=element_text(size=20));f2
+
+```
+
+
+```{r plot 4b}
+
+b2 = metadata %>% 
+  ggplot(aes(x = shannon_bacteria, y = cazyme_div_bacteria, group = Ecosystem_type)) +
+  geom_point(aes(x= shannon_bacteria, y = cazyme_div_bacteria, 
+                 color = Ecosystem_type, shape = Ecosystem_type, fill = Ecosystem_type), 
+              size = 2.5, alpha = 0.8)+
+    geom_smooth(data=subset(metadata, Ecosystem_type == "Forest"),
+               aes(shannon_bacteria,cazyme_div_bacteria,
+                   color=factor(Ecosystem_type)),
+              method=lm,se=F, fullrange = T,
+              lty = 1, size = 1.6)+
+  scale_color_manual(values = farg, guide = "none")+
+  scale_shape_manual(values = shape, guide = "none")+
+  scale_fill_manual(values = farg, guide = "none")+
+  theme_classic()+
+  labs(y = "", x = "",
+       color = "Land use") +
+ theme(text=element_text(size=20));b2
+
+```
+
+
+```{r plot 4c}
+
+f3 = metadata %>% 
+  ggplot(aes(x = shannon_fungi, y = pcyc_div_fungi, group = Ecosystem_type)) +
+  geom_point(aes(x= shannon_fungi, y = pcyc_div_fungi, color = Ecosystem_type, shape = Ecosystem_type, fill = Ecosystem_type),  size = 2.5,
+             alpha = 0.8)+
+  scale_color_manual(values = farg, guide = "none")+
+  scale_shape_manual(values = shape, guide = "none")+
+  scale_fill_manual(values = farg, guide = "none")+
+  theme_classic()+
+  labs(y = "", x = "",
+       color = "Land use") +
+ theme(text=element_text(size=20));f3
+
+```
+
+
+```{r plot 4d}
+
+
+b4 = metadata %>% 
+  ggplot(aes(x = shannon_bacteria, y = pcyc_div_bacteria, group = Ecosystem_type)) +
+  geom_point(aes(x= shannon_bacteria, y = pcyc_div_bacteria, 
+                 color = Ecosystem_type, shape = Ecosystem_type, fill = Ecosystem_type), 
+             size = 2.5, alpha = 0.8)+
+    geom_smooth(data=metadata,
+               aes(shannon_bacteria,pcyc_div_bacteria,
+                   color=factor(Ecosystem_type)),
+              method=lm,se=F,  fullrange = T,
+              lty = 1, size = 1.6)+
+  scale_color_manual(values = farg, guide = "none")+
+  scale_shape_manual(values = shape, guide = "none")+
+  scale_fill_manual(values = farg, guide = "none")+
+  theme_classic()+
+  labs(y = "", x = "",
+       color = "Land use") +
+ theme(text=element_text(size=20));b4
+
+```
+
+
+```{r plot 4e}
+
+
+b3 = metadata %>% 
+  ggplot(aes(x = shannon_bacteria, y = ncyc_div_bacteria, group = Ecosystem_type)) +
+  geom_point(aes(x= shannon_bacteria, y = ncyc_div_bacteria, 
+                 color = Ecosystem_type, shape = Ecosystem_type, fill = Ecosystem_type), 
+              size = 2.5, alpha = 0.8)+
+    geom_smooth(data=subset(metadata, Ecosystem_type == "Forest"),
+               aes(shannon_bacteria,ncyc_div_bacteria,
+                   color=factor(Ecosystem_type)),
+              method=lm,se=F, fullrange = T,
+              lty = 1, size = 1.6)+
+  scale_color_manual(values = farg, guide = "none")+
+  scale_shape_manual(values = shape, guide = "none")+
+  scale_fill_manual(values = farg, guide = "none")+
+  theme_classic()+
+  labs(y = "", x = "",
+       color = "Land use") +
+ theme(text=element_text(size=20));b3
+
+```
+
+
