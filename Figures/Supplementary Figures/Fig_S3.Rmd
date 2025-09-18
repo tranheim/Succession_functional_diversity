@@ -1,0 +1,309 @@
+---
+title: "Fig_S3"
+author: "Tord Ranheim"
+date: '2025-05-20'
+output:
+  html_document:
+    keep_md: no
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dev = "png",
+                      dpi=300,
+                      echo=F,
+                      cache=T, echo=T)
+```
+
+
+```{r}
+rm(list=ls())
+```
+
+
+Libraries
+```{r}
+library(dplyr)
+library(vegan)
+library(tidyr)
+library(ggplot2)
+library(ggpubr)
+```
+
+
+Data loading
+```{r Load data}
+
+#Load metadata
+metadata = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Metadata/Result/metadata.txt")
+row.names(metadata) = metadata$Sample
+
+
+```
+
+
+
+```{r Load results}
+
+vs = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Functional diversity/Variable selection/Results/results_variable_selection_fd.txt")
+
+hp = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Revision/diversity/results/hierarchical.txt")
+
+```
+
+
+                                         PREPARE DATASET
+###################################################################################################
+
+```{r}
+
+#fix names
+names(vs) = c("IncMSE","p.value","IncNodePurity","IncNodePurity.pvalue", "Community",
+                 "Function","Variable")
+
+#Add factor for p-value cutoff
+vs$Sign = ifelse(vs$p.value > 0.05, "not sign", "sign")
+
+#Set manual colors for p-value cutoff
+pval = c("grey60","red4")
+
+```
+
+
+
+                                               PLOT
+####################################################################################################
+Use separate barplots and then merge all plots into one
+
+```{r Fungi}
+
+p1 = hp %>% 
+  filter(Community == "Fungi") %>%
+  filter(Diversity == "C-cycling") %>%
+  ggplot(aes(x = reorder(Factor, Individual), Individual, fill = Factor)) +
+  geom_bar(stat = "identity") +
+  scale_fill_viridis_d()+
+  theme_classic()+
+    theme(text=element_text(size=17)) + 
+   guides(fill="none") + 
+   theme(aspect.ratio=3)+
+    labs(x = "", y = "Contribution")+
+   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+    coord_flip();p1
+
+p2 = vs %>% 
+  filter(Community == "Fungi") %>%
+  filter(Function == "CAZyme") %>%
+ggplot(aes(x = reorder(Variable, IncMSE), IncMSE)) +
+  geom_bar(stat = "identity", aes(fill = Sign)) +
+  scale_fill_manual(values = pval)+
+  facet_wrap(~Function) +
+  coord_flip() +
+  theme_bw()+
+    theme(text=element_text(size=17)) + 
+   guides(fill="none") + 
+    labs(x = "", y = "IncMSE (%)");p2
+
+
+p3 = hp %>% 
+  filter(Community == "Fungi") %>%
+  filter(Diversity == "P-cycling") %>%
+  ggplot(aes(x = reorder(Factor, Individual), Individual, fill = Factor)) +
+  geom_bar(stat = "identity") +
+  scale_fill_viridis_d()+
+  theme_classic()+
+    theme(text=element_text(size=17)) +  
+   guides(fill="none") + 
+   theme(aspect.ratio=3)+
+    labs(x = "", y = "Contribution")+
+   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+    coord_flip();p3
+
+p4 = vs %>% 
+  filter(Community == "Fungi") %>%
+  filter(Function == "Pcyc") %>%
+ggplot(aes(x = reorder(Variable, IncMSE), IncMSE)) +
+  geom_bar(stat = "identity", aes(fill = Sign)) +
+  scale_fill_manual(values = pval)+
+  facet_wrap(~Function) +
+  coord_flip() +
+  theme_bw()+
+    theme(text=element_text(size=17)) + 
+   guides(fill="none") + 
+    labs(x = "", y = "IncMSE (%)");p4
+
+
+```
+
+
+```{r plot fungi}
+
+ggarrange(p2,p1, p4, p3)
+
+```
+
+
+```{r Bacteria}
+
+p1 = hp %>% 
+  filter(Community == "Bacteria") %>%
+  filter(Diversity == "C-cycling") %>%
+  ggplot(aes(x = reorder(Factor, Individual), Individual, fill = Factor)) +
+  geom_bar(stat = "identity") +
+  scale_fill_viridis_d()+
+  theme_classic()+
+    theme(text=element_text(size=17)) + 
+   guides(fill="none") + 
+   theme(aspect.ratio=3)+
+    labs(x = "", y = "Contribution")+
+   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+    coord_flip();p1
+
+p2 = vs %>% 
+  filter(Community == "Bacteria") %>%
+  filter(Function == "CAZyme") %>%
+ggplot(aes(x = reorder(Variable, IncMSE), IncMSE)) +
+  geom_bar(stat = "identity", aes(fill = Sign)) +
+  scale_fill_manual(values = pval)+
+  facet_wrap(~Function) +
+  coord_flip() +
+  theme_bw()+
+    theme(text=element_text(size=17)) + 
+   guides(fill="none") + 
+    labs(x = "", y = "IncMSE (%)");p2
+
+
+p3 = hp %>% 
+  filter(Community == "Bacteria") %>%
+  filter(Diversity == "P-cycling") %>%
+  ggplot(aes(x = reorder(Factor, Individual), Individual, fill = Factor)) +
+  geom_bar(stat = "identity") +
+  scale_fill_viridis_d()+
+  theme_classic()+
+    theme(text=element_text(size=17)) +  
+   guides(fill="none") + 
+   theme(aspect.ratio=3)+
+    labs(x = "", y = "Contribution")+
+   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+    coord_flip();p3
+
+p4 = vs %>% 
+  filter(Community == "Bacteria") %>%
+  filter(Function == "Pcyc") %>%
+ggplot(aes(x = reorder(Variable, IncMSE), IncMSE)) +
+  geom_bar(stat = "identity", aes(fill = Sign)) +
+  scale_fill_manual(values = pval)+
+  facet_wrap(~Function) +
+  coord_flip() +
+  theme_bw()+
+    theme(text=element_text(size=17)) + 
+   guides(fill="none") + 
+    labs(x = "", y = "IncMSE (%)");p4
+
+
+p5 = hp %>% 
+  filter(Community == "Bacteria") %>%
+  filter(Diversity == "N-cycling") %>%
+  ggplot(aes(x = reorder(Factor, Individual), Individual, fill = Factor)) +
+  geom_bar(stat = "identity") +
+  scale_fill_viridis_d()+
+  theme_classic()+
+    theme(text=element_text(size=17)) + 
+   guides(fill="none") + 
+   theme(aspect.ratio=3)+
+    labs(x = "", y = "Contribution")+
+   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+    coord_flip();p5
+
+p6 = vs %>% 
+  filter(Community == "Bacteria") %>%
+  filter(Function == "Ncyc") %>%
+ggplot(aes(x = reorder(Variable, IncMSE), IncMSE)) +
+  geom_bar(stat = "identity", aes(fill = Sign)) +
+  scale_fill_manual(values = pval)+
+  facet_wrap(~Function) +
+  coord_flip() +
+  theme_bw()+
+    theme(text=element_text(size=17)) + 
+   guides(fill="none") + 
+    labs(x = "", y = "IncMSE (%)");p6
+
+```
+
+
+```{r plot bacteria}
+
+ggarrange(p2,p1, p4, p3)
+ggarrange(p2,p1, p6, p5)
+
+```
+
+
+
+
+                                FIGURE S9: BOXPLOTS MSIR
+############################################################################################
+
+```{r}
+
+res = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/SIR/Results/res_sir.txt")
+
+
+
+```
+
+
+```{r Set plotting details}
+
+#Set order of plotting
+res$Succession = ordered(res$Succession, levels = c("Managed","Recent","Late","Forest"))
+
+#Set manual color and shape
+farg = c("#bd0026","#fd8d3c","#fecc5c", "skyblue2")
+shape = c(21,23,24,25)
+
+#Create median line for forest reference stage
+f = res %>% filter(Succession == "Forest") 
+
+
+
+```
+
+
+```{r Plot msir}
+
+#Create median horizontal line
+h = median(f$msir, na.rm = T)
+
+p1 <- res %>%
+    bind_rows(tibble(var1 = "trt99")) %>% 
+  ggplot(aes(x= Succession, y = msir, fill = Succession))+
+  geom_boxplot(aes(fill= Succession),outlier.shape = NA)+
+    geom_point(position=position_jitter(0.1, seed = 123),alpha=0.5)+
+    scale_fill_manual(values=farg, na.translate = F)+
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      ylim(0,300)+
+      theme_classic()+
+  #geom_line(aes(group = Par),alpha = 0.05)+
+  scale_x_discrete(limits = c("Managed","Recent","Late","trt99","Forest"),
+  breaks = c("Managed","Recent","Late",NA,"Forest"),
+  labels = c("Managed","Recent","Late",NA,"Forest"))+
+  geom_vline(xintercept = "trt99", linetype = 2, linewidth = 0.2)+
+    geom_hline(yintercept = h, linetype = 2, linewidth = 0.9, col = "black")+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+  theme(legend.position = "none")+
+     theme(text=element_text(size=20));p1
+
+
+res %>% filter(msir > 0) %>%
+  rstatix::pairwise_wilcox_test(msir ~ Succession)
+
+```
+
+
+

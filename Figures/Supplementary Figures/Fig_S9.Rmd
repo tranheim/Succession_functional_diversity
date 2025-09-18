@@ -1,0 +1,104 @@
+---
+title: "Fig_S9"
+author: "Tord Ranheim"
+date: '2025-05-20'
+output:
+  html_document:
+    keep_md: no
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dev = "png",
+                      dpi=300,
+                      echo=F,
+                      cache=T, echo=T)
+```
+
+
+```{r}
+rm(list=ls())
+```
+
+
+Libraries
+```{r}
+library(dplyr)
+library(vegan)
+library(tidyr)
+library(ggplot2)
+library(ggpubr)
+```
+
+
+Data loading
+```{r Load data}
+
+#Load metadata
+metadata = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Metadata/Result/metadata.txt")
+row.names(metadata) = metadata$Sample
+
+res = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/SIR/Results/res_sir.txt")
+
+
+
+```
+
+
+
+                                FIGURE S9: BOXPLOTS MSIR
+############################################################################################
+```{r Set plotting details}
+
+#Set order of plotting
+res$Succession = ordered(res$Succession, levels = c("Managed","Recent","Late","Forest"))
+
+#Set manual color and shape
+farg = c("#bd0026","#fd8d3c","#fecc5c", "skyblue2")
+shape = c(21,23,24,25)
+
+#Create median line for forest reference stage
+f = res %>% filter(Succession == "Forest") 
+
+
+
+```
+
+
+```{r Plot msir}
+
+#Create median horizontal line
+h = median(f$msir, na.rm = T)
+
+p1 <- res %>%
+    bind_rows(tibble(var1 = "trt99")) %>% 
+  ggplot(aes(x= Succession, y = msir, fill = Succession))+
+  geom_boxplot(aes(fill= Succession),outlier.shape = NA)+
+    geom_point(position=position_jitter(0.1, seed = 123),alpha=0.5)+
+    scale_fill_manual(values=farg, na.translate = F)+
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      ylim(0,300)+
+      theme_classic()+
+  #geom_line(aes(group = Par),alpha = 0.05)+
+  scale_x_discrete(limits = c("Managed","Recent","Late","trt99","Forest"),
+  breaks = c("Managed","Recent","Late",NA,"Forest"),
+  labels = c("Managed","Recent","Late",NA,"Forest"))+
+  geom_vline(xintercept = "trt99", linetype = 2, linewidth = 0.2)+
+    geom_hline(yintercept = h, linetype = 2, linewidth = 0.9, col = "black")+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+  theme(legend.position = "none")+
+     theme(text=element_text(size=20));p1
+
+
+res %>% filter(msir > 0) %>%
+  rstatix::pairwise_wilcox_test(msir ~ Succession)
+
+```
+
+
+

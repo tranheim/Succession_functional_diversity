@@ -1,0 +1,176 @@
+---
+title: "Fig_S7"
+author: "Tord Ranheim"
+date: '2024-10-14'
+output:
+  html_document:
+    keep_md: no
+---
+
+
+Code to reproduce supplementary material figure 7
+
+NB! The figure has been manually compiled in pages
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dev = "png",
+                      dpi=300,
+                      echo=F,
+                      cache=T, echo=T)
+```
+
+
+```{r}
+rm(list=ls())
+```
+
+
+Libraries
+```{r}
+library(dplyr)
+library(vegan)
+library(tidyr)
+library(ggplot2)
+library(ggpubr)
+```
+
+
+
+```{r Load vs results}
+
+vs = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Functional redundancy/Framework/Variable selection/Results/results_variable_selection.txt")
+
+```
+
+
+                                        SET PLOT DETAILS
+#############################################################################################
+
+```{r Plot details}
+
+#fix names
+names(vs) = c("IncMSE","p.value","IncNodePurity","IncNodePurity.pvalue",
+                 "Variable","Element","Response")
+
+
+#Add factor for p-value cutoff
+vs$Sign = ifelse(vs$p.value > 0.05, "not sign", "sign")
+
+
+#Set manual colors for p-value cutoff
+pval = c("grey60","red4")
+
+```
+
+
+                                  Fig S7
+#############################################################################################
+
+```{r Fig 7a}
+
+#Redundancy
+p1 = vs %>% 
+  filter(Element == "Carbon") %>%
+  filter(Response == "Redundancy") %>%
+ggplot(aes(x = reorder(Variable, IncMSE), IncMSE)) +
+  geom_bar(stat = "identity", aes(fill = Sign)) +
+  scale_fill_manual(values = pval)+
+  facet_wrap(~Response) +
+  coord_flip() +
+  theme_bw()+
+   guides(fill="none") + 
+    labs(x = "Explanatory variable", y = "IncMSE (%)");p1
+
+
+#Specialization
+p2 = vs %>% 
+  filter(Element == "Carbon") %>%
+  filter(Response == "Specialization") %>%
+ggplot(aes(x = reorder(Variable, IncMSE), IncMSE)) +
+  geom_bar(stat = "identity", aes(fill = Sign)) +
+  scale_fill_manual(values = pval)+
+  facet_wrap(~Response) +
+  coord_flip() +
+  theme_bw()+
+   guides(fill="none") + 
+    labs(x = "", y = "IncMSE (%)");p2
+
+ggarrange(p1,p2)
+
+```
+
+
+
+
+```{r Fig. S7b}
+
+#Redundancy
+p1 = vs %>% 
+  filter(Element == "Phosphorus") %>%
+  filter(Response == "Redundancy") %>%
+ggplot(aes(x = reorder(Variable, IncMSE), IncMSE)) +
+  geom_bar(stat = "identity", aes(fill = Sign)) +
+  scale_fill_manual(values = pval)+
+  facet_wrap(~Response) +
+  coord_flip() +
+  theme_bw()+
+   # theme(text=element_text(size=16)) +
+   guides(fill="none") + 
+    labs(x = "Explanatory variable", y = "IncMSE (%)");p1
+
+
+#Specialization
+p2 = vs %>% 
+  filter(Element == "Phosphorus") %>%
+  filter(Response == "Specialization") %>%
+ggplot(aes(x = reorder(Variable, IncMSE), IncMSE)) +
+  geom_bar(stat = "identity", aes(fill = Sign)) +
+  scale_fill_manual(values = pval)+
+  facet_wrap(~Response) +
+  coord_flip() +
+  theme_bw()+
+   # theme(text=element_text(size=16)) +
+   guides(fill="none") + 
+    labs(x = "", y = "IncMSE (%)");p2
+
+ggarrange(p1,p2)
+
+```
+
+
+```{r Fig S7c}
+
+#Redundancy
+p1 = vs %>% 
+  filter(Element == "Nitrogen") %>%
+  filter(Response == "Redundancy") %>%
+ggplot(aes(x = reorder(Variable, IncMSE), IncMSE)) +
+  geom_bar(stat = "identity", aes(fill = Sign)) +
+  scale_fill_manual(values = pval)+
+  facet_wrap(~Response) +
+  coord_flip() +
+  theme_bw()+
+   # theme(text=element_text(size=16)) +
+   guides(fill="none") + 
+    labs(x = "Explanatory variable", y = "IncMSE (%)");p1
+
+
+#Specialization
+p2 = vs %>% 
+  filter(Element == "Nitrogen") %>%
+  filter(Response == "Specialization") %>%
+ggplot(aes(x = reorder(Variable, IncMSE), IncMSE)) +
+  geom_bar(stat = "identity", aes(fill = Sign)) +
+  scale_fill_manual(values = pval)+
+  facet_wrap(~Response) +
+  coord_flip() +
+  theme_bw()+
+   # theme(text=element_text(size=16)) +
+   guides(fill="none") + 
+    labs(x = "", y = "IncMSE (%)");p2
+
+ggarrange(p1,p2)
+
+```
+
