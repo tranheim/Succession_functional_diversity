@@ -1,0 +1,357 @@
+---
+title: "Fig. 5"
+author: "Tord Ranheim"
+date: '2024-12-20'
+output:
+  html_document:
+    keep_md: no
+---
+
+
+Code to reproduce panels in manuscript figure 5
+
+NB! The figure has been manually compiled in pages
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dev = "png",
+                      dpi=300,
+                      echo=F,
+                      cache=T, echo=T)
+```
+
+
+```{r}
+rm(list=ls())
+```
+
+
+Libraries
+```{r}
+library(dplyr)
+library(vegan)
+library(tidyr)
+library(ggplot2)
+library(ggpubr)
+```
+
+
+
+Data loading
+```{r Load data}
+
+#Load metadata
+metadata = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Metadata/Result/metadata.txt")
+row.names(metadata) = metadata$Sample
+
+```
+
+
+
+```{r Load files}
+
+#CAZymes
+caz_SG2 = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Functional redundancy/Niche overlap/CAZyme/Processing/Results/lno_cazyme_SG2.txt")
+caz_SG1 = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Functional redundancy/Niche overlap/CAZyme/Processing/Results/lno_cazyme_SG1.txt")
+
+#Pcyc
+pcyc = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Functional redundancy/Niche overlap/Pcyc/Processing/Results/res_lno_pcyc.txt")
+
+#Ncyc
+ncyc = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Functional redundancy/Niche overlap/Ncyc/Results/res_lno_ncyc.txt")
+
+
+```
+
+
+                                        SET PLOT DETAILS
+#############################################################################################
+
+```{r Set plotting details}
+
+#Set successional order
+caz_SG2$Succession = ordered(caz_SG2$Succession, levels = c("Managed","Recent","Late","Forest"))
+pcyc$Succession = ordered(pcyc$Succession, levels = c("Managed","Recent","Late","Forest"))
+ncyc$Succession = ordered(ncyc$Succession, levels = c("Managed","Recent","Late","Forest"))
+
+#Set substrate/pathway order
+caz_SG2$substrate = ordered(caz_SG2$substrate, 
+        levels = c("Oligosaccharides", "Starch/Glycogen", "Peptidoglycan", 
+                   "Fructan", "Pectin","Xylan", "Cellulose", "Cellulose/Chitin",
+                   "Lignin","Chitin", "Other_Polysaccharides",  "Mixed",
+                   "Not listed"))
+  
+farg = c("#bd0026","#fd8d3c", "#fecc5c", "skyblue2")
+
+```
+
+
+
+                     NICHE OVERLAP PLOTS (Figure 5a-f)
+#############################################################################################
+
+```{r c-cyc overlap fungi}
+
+p1 <- caz_SG2 %>%
+  filter(Community == "Fungi") %>%
+  ggplot(aes(x = Sucession_numeric, y = value))+
+  geom_jitter(aes(color = as.factor(Sucession_numeric)), 
+              position=position_jitter(0.2),alpha = 0.3)+
+     geom_smooth(
+        aes(x = Sucession_numeric, y = value),
+        color = "black",
+        method = "lm",
+        #data = f2,
+           linewidth = 1.2, 
+        linetype = 1, 
+        fullrange = T,
+        se = T
+    ) +
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      ylim(0.3,1.2)+
+      theme_classic()+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+  theme(legend.position = "none")+
+     theme(text=element_text(size=20));p1
+
+p1 = p1 + stat_summary(fun.y = mean,
+               fun.ymin = function(x) mean(x) - sd(x), 
+               fun.ymax = function(x) mean(x) + sd(x), 
+               geom = "pointrange",
+               colour = "grey9");p1
+
+#Regression statistics
+summary(lm(value ~ Sucession_numeric,data= subset(caz_SG2, Community == "Fungi")))
+
+```
+
+
+```{r c-cyc overlap bacteria}
+
+p2 <- caz_SG2 %>%
+  filter(Community == "Bacteria") %>%
+  ggplot(aes(x = Sucession_numeric, y = value))+
+  geom_jitter(aes(color = as.factor(Sucession_numeric)), 
+              position=position_jitter(0.05),alpha = 0.3)+
+     geom_smooth(
+        aes(x = Sucession_numeric, y = value),
+        color = "black",
+        method = "lm",
+        #data = b2,
+        formula = y ~ x + I(x^2),
+           linewidth = 1.2, 
+        linetype = 1, 
+        fullrange = T,
+        se = T
+    ) +
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      ylim(0.3,1.2)+
+      theme_classic()+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+  theme(legend.position = "none")+
+     theme(text=element_text(size=20));p2
+
+p2 = p2 + stat_summary(fun.y = mean,
+               fun.ymin = function(x) mean(x) - sd(x), 
+               fun.ymax = function(x) mean(x) + sd(x), 
+               geom = "pointrange",
+               colour = "grey9");p2
+
+
+#Regression statistics
+summary(lm(value ~ Sucession_numeric + I(Sucession_numeric^2),data= subset(caz_SG2, Community == "Bacteria")))
+
+```
+
+
+
+```{r plot 5ab}
+
+ggarrange(p1,p2)
+
+```
+
+
+
+```{r pcyc overlap fungi}
+
+p1 <- pcyc %>%
+  filter(Community == "Fungi") %>%
+  ggplot(aes(x = Sucession_numeric, y = value))+
+  geom_jitter(aes(color = as.factor(Sucession_numeric)), 
+              position=position_jitter(0.2),alpha = 0.3)+
+     geom_smooth(
+        aes(x = Sucession_numeric, y = value),
+        color = "black",
+        method = "lm",
+        #data = f2,
+        formula = y ~ x + I(x^2),
+           linewidth = 1.2, 
+        linetype = 1, 
+        fullrange = T,
+        se = T
+    ) +
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      ylim(0.3,1.2)+
+      theme_classic()+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+  theme(legend.position = "none")+
+     theme(text=element_text(size=20));p1
+
+p1 = p1 + stat_summary(fun.y = mean,
+               fun.ymin = function(x) mean(x) - sd(x), 
+               fun.ymax = function(x) mean(x) + sd(x), 
+               geom = "pointrange",
+               colour = "grey9");p1
+
+
+#Regression statistics
+summary(lm(value ~ Sucession_numeric + I(Sucession_numeric^2),data= subset(pcyc, Community == "Fungi")))
+
+```
+
+
+
+```{r pcyc overlap bacteria}
+
+p2 <- pcyc %>%
+   filter(Community == "Bacteria") %>%
+  ggplot(aes(x = Sucession_numeric, y = value))+
+  geom_jitter(aes(color = as.factor(Sucession_numeric)), 
+              position=position_jitter(0.05),alpha = 0.3)+
+     geom_smooth(
+        aes(x = Sucession_numeric, y = value),
+        color = "black",
+        method = "lm",
+        #formula = y ~ x,
+        #data = b2,
+           linewidth = 1.2, 
+        linetype = 1, 
+        fullrange = T,
+        se = T
+    ) +
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      ylim(0.3,1.2)+
+      theme_classic()+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+  theme(legend.position = "none")+
+     theme(text=element_text(size=20));p2
+
+p2 = p2 + stat_summary(fun.y = mean,
+               fun.ymin = function(x) mean(x) - sd(x), 
+               fun.ymax = function(x) mean(x) + sd(x), 
+               geom = "pointrange",
+               colour = "grey9");p2
+
+
+#Regression statistics
+summary(lm(value ~ Sucession_numeric,data= subset(pcyc, Community == "Bacteria")))
+
+```
+
+
+```{r plot 5cd}
+
+ggarrange(p1,p2)
+
+```
+
+
+
+```{r Supplementary data Fig. SX}
+
+p1 <- ncyc %>%
+  ggplot(aes(x = Sucession_numeric, y = value))+
+  geom_jitter(aes(color = as.factor(Sucession_numeric)), 
+              position=position_jitter(0.05),alpha = 0.3)+
+     geom_smooth(
+        aes(x = Sucession_numeric, y = value),
+        color = "black",
+        method = "lm",
+        formula = y ~ x + I(x^2),
+        #data = b2,
+           linewidth = 1.2, 
+        linetype = 1, 
+        fullrange = T,
+        se = T
+    ) +
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      ylim(0.3,1.2)+
+      theme_classic()+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+  theme(legend.position = "none")+
+     theme(text=element_text(size=20));p1
+
+p1 = p1 + stat_summary(fun.y = mean,
+               fun.ymin = function(x) mean(x) - sd(x), 
+               fun.ymax = function(x) mean(x) + sd(x), 
+               geom = "pointrange",
+               colour = "grey9");p1
+
+#Regression statistics
+summary(lm(value ~ Sucession_numeric + I(Sucession_numeric^2),data= ncyc))
+
+```
+
+
+                           NICHE OVERLAP PLOTS BY CARBON SUBSTRATE (Figure 5e-f)
+#############################################################################################
+
+```{r plot 5e}
+
+p1 <- caz_SG2 %>%
+  filter(Community == "Fungi") %>%
+  filter(substrate != "Not listed") %>%
+   filter(substrate != "Pectin") %>%
+  ggplot(aes(x= substrate, y = value, fill = Succession))+
+  geom_boxplot(outlier.shape = NA)+
+  scale_fill_manual(values = farg)+
+      labs(fill = "Land use", y = "Genetic overlap")+
+      ylim(0.3,1.1)+
+      theme_classic()+
+  theme(axis.text.x = element_text(angle = 35, vjust = 1, hjust=1))+
+  theme(legend.position = "none")+
+     theme(text=element_text(size=20));p1
+
+```
+
+```{r plot 5f}
+
+p2 <- caz_SG2 %>%
+  filter(Community == "Bacteria") %>%
+  filter(substrate != "Not listed") %>%
+  filter(substrate != "Cellulose/Chitin") %>%
+  ggplot(aes(x= substrate, y = value, fill = Succession))+
+  geom_boxplot(outlier.shape = NA)+
+  scale_fill_manual(values = farg)+
+      labs(fill = "Land use", y = "Genetic overlap")+
+      ylim(0.7,1.1)+
+      theme_classic()+
+  theme(axis.text.x = element_text(angle = 35, vjust = 1, hjust=1))+
+  theme(legend.position = "none")+
+     theme(text=element_text(size=20));p2
+
+```
+
+
+
