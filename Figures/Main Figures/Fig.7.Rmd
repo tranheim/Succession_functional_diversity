@@ -1,0 +1,126 @@
+---
+title: "Fig. 7"
+author: "Tord Ranheim"
+date: '2024-12-20'
+output:
+  html_document:
+    keep_md: no
+---
+
+
+Code to reproduce panels in manuscript figure 7
+
+NB! The figure has been manually compiled in pages
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dev = "png",
+                      dpi=300,
+                      echo=F,
+                      cache=T, echo=T)
+```
+
+
+```{r}
+rm(list=ls())
+```
+
+
+Libraries
+```{r}
+library(dplyr)
+library(vegan)
+library(tidyr)
+library(ggplot2)
+library(ggpubr)
+```
+
+
+
+```{r Load metadata file}
+
+metadata = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Metadata/Result/metadata.txt")
+row.names(metadata) = metadata$Sample
+
+res = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/SIR/Results/res_sir.txt")
+
+es = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/SIR/Results/res_effectsize.txt", sep = "\t",header = T)
+
+```
+
+
+                                       FIG 6
+#############################################################################################
+
+```{r Set plot details}
+
+farg2 = c("#bd0026","#fd8d3c","#fecc5c")
+
+es$Contrast = ordered(es$Contrast, levels = c(
+  "Managed vs Forest", "Recent vs Forest", "Late vs Forest"
+))
+
+es$Substrate = ordered(es$Substrate, levels = c("Glucose_resp", "Glycine_resp",
+"OA_resp", "AY_resp",  "Lignin_resp", "Chitin_resp",
+  "Basal_resp", "Glucose_resp_std", "Glycine_resp_std", "OA_resp_std",  "AY_resp_std", "Lignin_resp_std", "Chitin_resp_std"))
+                                   
+#Set manual color and shape
+farg3 = c("#fd8d3c","skyblue2")
+shape2 = c(16,23)
+res$Ecosystem_type = ordered(res$Ecosystem_type, levels = c("Grassland","Forest"))
+
+```
+
+
+```{r Plot 7a}
+
+es %>%
+  filter(Standardized == "No") %>%
+  ggplot(aes(x= Substrate, y = Hedges_g, color = Contrast))+
+  geom_pointrange(aes(ymin = CI_low, ymax = CI_high), position = position_dodge(0.6))+
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  theme_classic()+
+  ylim(-3,3) +
+  scale_color_manual(values = farg2) +
+  theme(text=element_text(size=20)) + 
+  coord_flip()
+
+```
+
+
+```{r Plot 7b-c}
+
+#Plot 7b
+p1 = res %>% 
+  ggplot(aes(x = cazyme_diversity_fungi, y = msir, 
+             color = Ecosystem_type,shape = Ecosystem_type, fill = Ecosystem_type)) +
+  geom_point(size = 4,alpha = 0.8)+
+   geom_smooth(method=lm, se=F, fullrange=T,aes(group=Ecosystem_type), size = 2)+
+  geom_smooth(method = lm,se=F,aes(group=1),fullrange = T, 
+              color='black', linetype = 2, size = 1.4) +
+  scale_color_manual(values = farg3, guide = "none")+
+  scale_shape_manual(values = shape2, guide = "none")+
+  scale_fill_manual(values = farg3, guide = "none")+
+  theme_classic()+
+  labs(y = "", x = "",
+       color = "Land use") +
+ theme(text=element_text(size=20));p1
+
+
+#Plot 7c
+p2 = res %>% 
+  ggplot(aes(x = cazyme_diversity_bacteria, y = msir, group = Ecosystem_type)) +
+  geom_point(aes(x= cazyme_diversity_bacteria, y = msir, color = Ecosystem_type, shape = Ecosystem_type, fill = Ecosystem_type), size = 4,
+             alpha = 0.8)+
+  scale_color_manual(values = farg3, guide = "none")+
+  scale_shape_manual(values = shape2, guide = "none")+
+  scale_fill_manual(values = farg3, guide = "none")+
+  theme_classic()+
+  labs(y = "", x = "",
+       color = "Land use") +
+ theme(text=element_text(size=20));p2
+
+```
+
+
+

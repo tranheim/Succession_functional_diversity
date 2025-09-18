@@ -1,0 +1,106 @@
+---
+title: "Fig. 6"
+author: "Tord Ranheim"
+date: '2024-12-20'
+output:
+  html_document:
+    keep_md: no
+---
+
+
+Code to reproduce panels in manuscript figure 6b
+
+NB! Elements fig 6a and 6c are conceptual and not based on codes
+NB! The figure has been manually compiled in pages
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dev = "png",
+                      dpi=300,
+                      echo=F,
+                      cache=T, echo=T)
+```
+
+
+```{r}
+rm(list=ls())
+```
+
+
+Libraries
+```{r}
+library(dplyr)
+library(vegan)
+library(tidyr)
+library(ggplot2)
+library(ggpubr)
+```
+
+
+
+```{r Load metadata file}
+
+metadata = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Metadata/Result/metadata.txt")
+row.names(metadata) = metadata$Sample
+
+```
+
+```{r Load Q R D results}
+
+qrd = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Functional redundancy/Framework/Results/res_qrd.txt")
+
+```
+
+```{r merge}
+
+master = left_join(qrd, metadata)
+res = master %>% dplyr::select(Sample, Succession, Element, Q, R, D, pH, LDMC, C.N, Ecosystem_type, Tot_C)
+
+rm(qrd, master)
+```
+
+                                        SET PLOT DETAILS
+#############################################################################################
+
+```{r Set plotting details}
+
+farg2 = c("#fd8d3c","skyblue2")
+shape2 = c(16,23)
+
+d1 = res %>% 
+  dplyr::select(Succession, D, R, Q, Ecosystem_type, Element)
+
+d1$Succession = ordered(d1$Succession, levels = c("Managed","Recent","Late","Forest"))
+d1$Ecosystem_type = ordered(d1$Ecosystem_type, levels = c("Grassland","Forest"))
+
+```
+
+
+
+                                          FIGURE 6b
+#############################################################################################
+
+```{r Carbon ternary plot}
+
+p1 = d1 %>% 
+  filter(Element == "Carbon") %>%
+  ggtern::ggtern(aes(D,R,Q, colour = Succession, shape = Succession)) +
+        theme_bw()+
+    geom_point(aes(fill = Succession), 
+    position= position_jitter_tern(x=0.03,y=0.03,z=0.03),
+    size = 2, alpha = 0.8) +
+    geom_mask()+
+  scale_color_manual(values = farg) +
+    scale_shape_manual(values = shape)+
+  scale_fill_manual(values = farg)+
+  #geom_path(alpha=0.6) +
+  labs(x = "Dominance",y = "Redundancy", 
+       z = "Diversity", color = "Land use", 
+       shape = "Land use", fill = "Land use")
+
+p1 + limit_tern(.69,.15,.53)
+
+```
+
+
+
