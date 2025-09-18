@@ -1,0 +1,282 @@
+---
+title: "tests_niche_overlap"
+author: "Tord Ranheim"
+date: "2024-10-29"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dev = "png",
+                      dpi=300,
+                      echo=F,
+                      cache=T, echo=T)
+```
+
+
+
+###loading requisite libraries 
+```{r libraries to load}
+library(tidyverse)
+library(rmarkdown)
+library(knitr)
+library(magrittr)
+library(ggplot2)
+library(RColorBrewer)
+library(ggpubr)
+library(ggsci)
+library(dplyr)
+library(phyloseq)
+library(phylosmith)
+library(microbiome)
+library(vegan)
+library(metagMisc)
+library(ape)
+library(microViz)
+
+```
+
+
+
+```{r}
+rm(list=ls())
+
+```
+
+
+                                       LOAD DATA
+###################################################################################################
+
+```{r Load data}
+
+#Load metadata
+metadata = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Metadata/Result/metadata.txt")
+row.names(metadata) = metadata$Sample
+
+#Load niche overlap results
+r1 = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Revision/results/lno_cazyme_SG1.txt")
+r2 = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Revision/results/lno_cazyme_SG2.txt")
+r3 = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Revision/results/res_lno_pcyc.txt")
+r4 = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Revision/results/res_lno_ncyc.txt")
+
+```
+
+
+                                          PREPARE DATAFRAMES
+###################################################################################################
+
+```{r}
+
+names = c("Variable","Value","Group","Succession","Succession_numeric","Community","Func")
+r1$func = "CAZyme_SG1"
+r2$func = "CAZyme_SG2"
+r3$func = "Pcyc"
+r4$func = "Ncyc"
+
+names(r1) = names
+names(r2) = names
+k1 = rbind(r1,r2)
+
+
+r3$Group = "NA"
+r3 = r3[,c(1:2,7,3:6)]
+names(r3) = names
+r4$Group = "NA"
+r4 = r4[,c(1:2,7,3:6)]
+names(r4) = names
+
+k2 = rbind(r3,r4)
+
+res = rbind(k1,k2)
+
+rm(r1,r2,r3,r4,k1,k2)
+
+res$Succession_numeric = as.numeric(res$Succession_numeric)
+
+#Write to results
+#write.table(res, file = "./res_overlap.txt")
+
+```
+
+
+                                        TESTS
+###################################################################################################
+
+We test whether OLS or polynomial regressions best fit the decline in genetic overlap across succession (Table S14) and determine if groups differ from each other using pairwise Wilcox tests (Table S15)
+
+```{r C cycling genes fungi}
+
+#Fungi
+r1 = res %>% filter(Func == "CAZyme_SG1" & Community == "Fungi")
+
+#Regression statistics
+mod0 = lm(Value ~ Succession,data = r1)
+mod1 = lm(Value ~ poly(Succession_numeric,2),data= r1)
+
+summary(mod0)
+summary(mod1)
+anova(mod0,mod1)
+AIC(mod0)
+AIC(mod1)
+
+#Pairwise Wilcox tests
+t1 = res %>%
+  filter(Func == "CAZyme_SG1" & Community == "Fungi") |>
+  wilcox_test(Value ~ Succession);t1
+
+```
+
+
+```{r P cycling genes fungi}
+
+#Fungi
+r1 = res %>% filter(Func == "Pcyc" & Community == "Fungi")
+
+#Regression statistics
+mod0 = lm(Value ~ Succession,data = r1)
+mod1 = lm(Value ~ poly(Succession_numeric,2),data= r1)
+
+summary(mod0)
+summary(mod1)
+anova(mod0,mod1)
+AIC(mod0)
+AIC(mod1)
+
+#Pairwise Wilcox tests
+t1 = res %>%
+  filter(Func == "Pcyc" & Community == "Fungi") |>
+  wilcox_test(Value ~ Succession);t1
+
+
+```
+
+
+```{r C cycling genes bacteria}
+
+#Fungi
+r1 = res %>% filter(Func == "CAZyme_SG1" & Community == "Bacteria")
+
+#Regression statistics
+mod0 = lm(Value ~ Succession,data = r1)
+mod1 = lm(Value ~ poly(Succession_numeric,2),data= r1)
+
+summary(mod0)
+summary(mod1)
+anova(mod0,mod1)
+AIC(mod0)
+AIC(mod1)
+
+#Pairwise Wilcox tests
+t1 = res %>%
+  filter(Func == "CAZyme_SG1" & Community == "Bacteria") |>
+  wilcox_test(Value ~ Succession);t1
+
+```
+
+
+```{r P cycling genes bacteria}
+
+#Fungi
+r1 = res %>% filter(Func == "Pcyc" & Community == "Bacteria")
+
+#Regression statistics
+mod0 = lm(Value ~ Succession,data = r1)
+mod1 = lm(Value ~ poly(Succession_numeric,2),data= r1)
+
+summary(mod0)
+summary(mod1)
+anova(mod0,mod1)
+AIC(mod0)
+AIC(mod1)
+
+#Pairwise Wilcox tests
+t1 = res %>%
+  filter(Func == "Pcyc" & Community == "Bacteria") |>
+  wilcox_test(Value ~ Succession);t1
+
+```
+
+
+```{r N cycling genes bacteria}
+
+#Fungi
+r1 = res %>% filter(Func == "Ncyc" & Community == "Bacteria")
+
+#Regression statistics
+mod0 = lm(Value ~ Succession,data = r1)
+mod1 = lm(Value ~ poly(Succession_numeric,2),data= r1)
+
+summary(mod0)
+summary(mod1)
+anova(mod0,mod1)
+AIC(mod0)
+AIC(mod1)
+
+#Pairwise Wilcox tests
+t1 = res %>%
+  filter(Func == "Ncyc" & Community == "Bacteria") |>
+  wilcox_test(Value ~ Succession);t1
+
+```
+
+
+Use pairwise Wilcoxon tests to determine whether niche overlap of genes differ between successional stages when partitioned across substrates (CAZymes) or pathways (P-cycling/N-cycling genes). Results displayed in Table S16-S18
+
+```{r Genetic overlap by substrate or pathways}
+
+r1 = res %>% filter(Func == "CAZyme_SG2")
+
+unique(r1$Group)
+names = c("Oligosaccharides","Cellulose","Lignin","Chitin",
+          "Other_Polysaccharides","Mixed")
+
+#Fungi
+t1 = r1 %>%
+  filter(Community == "Fungi") |>
+  filter(Group %in% names) |>
+  group_by(Group) |>
+  wilcox_test(Value ~ Succession);t1
+
+#Bacteria
+t2 = r1 %>%
+  filter(Community == "Bacteria") |>
+  filter(Group %in% names) |>
+  group_by(Group) |>
+  wilcox_test(Value ~ Succession);t2
+
+
+#Fungal P-cycling by pathways
+t1 = res %>%
+  filter(Community == "Fungi") |>
+  filter(Func == "Pcyc") |>
+  group_by(Variable) |>
+  wilcox_test(Value ~ Succession);t1
+
+
+#Bacterial P-cycling by pathways
+t1 = res %>%
+  filter(Community == "Bacteria") |>
+  filter(Func == "Pcyc") |>
+  group_by(Variable) |>
+  wilcox_test(Value ~ Succession);t1
+
+
+#Bacterial N-cycling by pathways
+t1 = res %>%
+  filter(Community == "Bacteria") |>
+  filter(Func == "Ncyc") |>
+  group_by(Variable) |>
+  wilcox_test(Value ~ Succession);t1
+
+
+```
+
+
+
+
+
+
+
+
+
+
