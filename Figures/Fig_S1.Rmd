@@ -1,0 +1,116 @@
+---
+title: "Fig_S1"
+author: "Tord Ranheim"
+date: "2025-04-22"
+output:
+  html_document:
+    keep_md: no
+---
+
+
+This script creates a PCA of forest characteristics to be included as a random factors in subsequent analyses
+
+##################################################################################################################################
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dev = "png",
+                      dpi=300,
+                      echo=F,
+                      cache=T, echo=T)
+```
+
+
+
+```{r Clear directory}
+
+rm(list=ls())
+
+```
+
+
+                                       LOAD LIBRARIES
+#############################################################################################
+```{r libraries to load}
+library(tidyverse)
+library(rstatix)
+library(ggplot2)
+
+```
+
+
+
+                                       LOAD DATA
+#############################################################################################
+```{r Load data}
+
+#Load metadata
+metadata = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Metadata/Result/metadata.txt")
+row.names(metadata) = metadata$Sample
+
+```
+
+
+                                      DERIVE FOREST CHARACTERISTICS
+#############################################################################################
+```{r Subset to forest data only}
+
+forest = metadata %>%
+  filter(Succession == "Forest") %>%
+  dplyr::select(Age, Evenness)
+
+```
+
+
+
+```{r Figure S1a-c}
+
+#Fig S1a
+ggplot(forest, aes(x=Age)) + 
+  geom_histogram(aes(y=..density..),color="black", fill="lightblue") +
+  geom_density(alpha=.2, fill="#FF6666") +
+  theme_classic() +
+  xlim(0,250)+
+    theme(text=element_text(size=22))
+
+#Fig S1b
+f2 <- forest %>%
+  group_by(Evenness) %>%
+  summarise(number_cases = n());f2
+ggplot(f2, aes(x = Evenness, y = number_cases, fill = Evenness)) +
+  geom_bar(stat = "identity", color="black") +
+  scale_fill_manual(values = c("#66C2A5", "#FC8D62", "#8DA0CB"))+
+  theme_classic() +
+    labs(x = "",y = "Number of forest sites") +
+  theme(text=element_text(size=22))+
+  coord_fixed(ratio = 1/10)
+
+
+#Fig S1c
+ggplot(data=forest, aes(x=Evenness, y=Age, fill = Evenness)) +
+  geom_boxplot(aes(fill= Evenness),outlier.shape = NA)+
+  #scale_fill_manual(values = c("#00AFBB", "#E7B800", "#FC4E07"))+
+  scale_fill_brewer(palette = "Set2")+
+  geom_point(position=position_jitter(0.1, seed = 123),alpha=0.5)+
+  ylim(0,250)+
+    theme_classic() +
+  theme(text=element_text(size=22))
+
+             
+```
+
+```{r Statistics}
+
+
+
+#Test
+forest %>% 
+  pairwise_wilcox_test(Age ~ Evenness)
+
+```
+
+
+
+
+
+
+
