@@ -1,0 +1,432 @@
+---
+title: "Fig. 3"
+author: "Tord Ranheim"
+date: '2024-12-20'
+output:
+  html_document:
+    keep_md: no
+---
+
+
+Code to reproduce panels in manuscript figure 3
+
+NB! The figure has been manually compiled in pages
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dev = "png",
+                      dpi=300,
+                      echo=F,
+                      cache=T, echo=T)
+```
+
+
+```{r}
+rm(list=ls())
+```
+
+
+Libraries
+```{r}
+library(dplyr)
+library(vegan)
+library(tidyr)
+library(ggplot2)
+library(ggpubr)
+```
+
+
+
+Data loading
+```{r Load data}
+
+#Load metadata
+metadata = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Metadata/Result/metadata.txt")
+row.names(metadata) = metadata$Sample
+
+```
+
+
+
+```{r Load results}
+
+res_diversity = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/MS/Submission/NC/Code/Results/Diversity_results.txt")
+
+es_alpha = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Revision/diversity/results/es_ad.txt")
+
+es_beta = read.table("//Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Revision/diversity/results/es_bd.txt")
+
+```
+
+
+
+                                         PREPARE DATASET
+#############################################################################################
+
+
+```{r}
+
+metadata = left_join(metadata, res_diversity)
+
+es_beta = es_beta %>% 
+  filter(Factor == "Succession")
+
+names(es_beta) = c("DF","SoS","F","Omega2_partial","p","Community", "R2", "Comparison",
+                   "Diversity","Factor","Covariates")
+
+
+```
+
+                                        SET PLOT DETAILS
+#############################################################################################
+
+```{r Set plotting details}
+
+#Set order of plotting
+metadata$Succession = ordered(metadata$Succession, levels = c("Managed","Recent","Late","Forest"))
+
+#Set manual color and shape
+farg = c("#bd0026","#fd8d3c","#fecc5c", "skyblue2")
+shape = c(21,23,24,25)
+farg2 = "grey59"
+
+#Create median line for forest reference stage
+f = metadata %>% filter(Succession == "Forest") 
+
+```
+
+
+
+               FUNCTIONAL DIVERSITY PLOTS (Figure 3a-e)
+#############################################################################################
+
+```{r c-cyc diversity fungi}
+
+#Create median horizontal line
+h = median(f$cazyme_div_fungi, na.rm = T)
+
+#Fungi
+p1 <- metadata %>%
+    bind_rows(tibble(var1 = "trt99")) %>% 
+  ggplot(aes(x= Succession, y = cazyme_div_fungi, fill = Succession))+
+  geom_boxplot(aes(fill= Succession),outlier.shape = NA)+
+    geom_point(position=position_jitter(0.1, seed = 123),alpha=0.5)+
+    scale_fill_manual(values=farg, na.translate = F)+
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      ylim(2,4.7)+
+      theme_classic()+
+  scale_x_discrete(limits = c("Managed","Recent","Late","trt99","Forest"),
+  breaks = c("Managed","Recent","Late",NA,"Forest"),
+  labels = c("Managed","Recent","Late",NA,"Forest"))+
+  geom_vline(xintercept = "trt99", linetype = 2, linewidth = 0.2)+
+    geom_hline(yintercept = h, linetype = 2, linewidth = 0.9, col = "black")+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+     theme(text=element_text(size=20));p1
+
+```
+
+
+```{r ccyc diversity bacteria}
+
+#Create median horizontal line
+h = median(f$cazyme_div_bacteria, na.rm = T)
+
+#Fungi
+p2 <- metadata %>%
+    bind_rows(tibble(var1 = "trt99")) %>% 
+  ggplot(aes(x= Succession, y = cazyme_div_bacteria, fill = Succession))+
+  geom_boxplot(aes(fill= Succession),outlier.shape = NA)+
+    geom_point(position=position_jitter(0.1, seed = 123),alpha=0.5)+
+    scale_fill_manual(values=farg, na.translate = F)+
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      ylim(3.25,3.75)+
+      theme_classic()+
+  scale_x_discrete(limits = c("Managed","Recent","Late","trt99","Forest"),
+  breaks = c("Managed","Recent","Late",NA,"Forest"),
+  labels = c("Managed","Recent","Late",NA,"Forest"))+
+  geom_vline(xintercept = "trt99", linetype = 2, linewidth = 0.2)+
+    geom_hline(yintercept = h, linetype = 2, linewidth = 0.9, col = "black")+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+     theme(text=element_text(size=20));p2
+
+```
+
+
+```{r Plot fig 3ab}
+
+ggarrange(p1,p2,
+legend = "none")
+
+```
+
+
+
+
+```{r pcyc diversity fungi}
+
+#Create median horizontal line
+h = median(f$pcyc_div_fungi, na.rm = T)
+
+#Fungi
+p1 <- metadata %>%
+    bind_rows(tibble(var1 = "trt99")) %>% 
+  ggplot(aes(x= Succession, y = pcyc_div_fungi, fill = Succession))+
+  geom_boxplot(aes(fill= Succession),outlier.shape = NA)+
+    geom_point(position=position_jitter(0.1, seed = 123),alpha=0.5)+
+    scale_fill_manual(values=farg, na.translate = F)+
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      ylim(3,3.45)+
+      theme_classic()+
+  #geom_line(aes(group = Par),alpha = 0.05)+
+  scale_x_discrete(limits = c("Managed","Recent","Late","trt99","Forest"),
+  breaks = c("Managed","Recent","Late",NA,"Forest"),
+  labels = c("Managed","Recent","Late",NA,"Forest"))+
+  geom_vline(xintercept = "trt99", linetype = 2, linewidth = 0.2)+
+    geom_hline(yintercept = h, linetype = 2, linewidth = 0.9, col = "black")+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+  #theme(legend.position = "none")+
+     theme(text=element_text(size=20));p1
+
+```
+
+
+
+```{r pcyc diversity bacteria}
+
+#Create median horizontal line
+h = median(f$pcyc_div_bacteria, na.rm = T)
+
+#Fungi
+p2 <- metadata %>%
+    bind_rows(tibble(var1 = "trt99")) %>% 
+  ggplot(aes(x= Succession, y = pcyc_div_bacteria, fill = Succession))+
+  geom_boxplot(aes(fill= Succession),outlier.shape = NA)+
+    geom_point(position=position_jitter(0.1, seed = 123),alpha=0.5)+
+    scale_fill_manual(values=farg, na.translate = F)+
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      ylim(3.95,4.15)+
+      theme_classic()+
+  #geom_line(aes(group = Par),alpha = 0.05)+
+  scale_x_discrete(limits = c("Managed","Recent","Late","trt99","Forest"),
+  breaks = c("Managed","Recent","Late",NA,"Forest"),
+  labels = c("Managed","Recent","Late",NA,"Forest"))+
+  geom_vline(xintercept = "trt99", linetype = 2, linewidth = 0.2)+
+    geom_hline(yintercept = h, linetype = 2, linewidth = 0.9, col = "black")+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+  #theme(legend.position = "none")+
+     theme(text=element_text(size=20));p2
+
+```
+
+
+```{r Plot fig 3cd}
+
+ggarrange(p1,p2,
+legend = "none")
+
+```
+
+
+
+```{r ncyc diversity bacteria}
+
+#Create median horizontal line
+h = median(f$ncyc_div_bacteria, na.rm = T)
+
+#Fungi
+p7 <- metadata %>%
+    bind_rows(tibble(var1 = "trt99")) %>% 
+  ggplot(aes(x= Succession, y = ncyc_div_bacteria, fill = Succession))+
+  geom_boxplot(aes(fill= Succession),outlier.shape = NA)+
+    geom_point(position=position_jitter(0.1, seed = 123),alpha=0.5)+
+    scale_fill_manual(values=farg, na.translate = F)+
+    scale_color_manual(values=farg, na.translate = F)+
+      labs(fill = "Land use", y = "Diversity")+
+      ylim(2,3.4)+
+      theme_classic()+
+  #geom_line(aes(group = Par),alpha = 0.05)+
+  scale_x_discrete(limits = c("Managed","Recent","Late","trt99","Forest"),
+  breaks = c("Managed","Recent","Late",NA,"Forest"),
+  labels = c("Managed","Recent","Late",NA,"Forest"))+
+  geom_vline(xintercept = "trt99", linetype = 2, linewidth = 0.2)+
+    geom_hline(yintercept = h, linetype = 2, linewidth = 0.9, col = "black")+
+  theme(axis.title.x = element_blank())+
+  theme(axis.text.x = element_blank())+
+    theme(axis.title.y = element_blank())+
+  theme(axis.ticks.x = element_blank())+
+  #theme(legend.position = "none")+
+     theme(text=element_text(size=20));p7
+
+```
+
+
+
+                                  EFFECT SIZE PLOT (Figure 3f-h)
+#############################################################################################
+
+```{r}
+
+order = c("Late vs Forest","Recent vs Forest","Managed vs Forest")
+
+es_alpha$Comparison = ordered(es_alpha$Comparison, 
+        levels = order)
+es_beta$Comparison = ordered(es_beta$Comparison, 
+        levels = order)
+
+es_alpha$Community = ordered(es_alpha$Community, 
+        levels = c("Fungi","Bacteria"))
+es_beta$Community = ordered(es_beta$Community, 
+        levels = c("Fungi","Bacteria"))
+
+farg = c("#fecc5c","#fd8d3c", "#bd0026")
+
+
+```
+
+
+```{r effect size C-cycling diversity}
+
+#Fungi
+p1 = es_alpha %>%
+   filter(Community == "Fungi") %>%
+  filter(Covariates == 0) %>%
+  filter(Diversity == "C-cycling") %>%
+  ggplot(aes(x= Comparison, y = Omega2_partial, color = Comparison))+
+  geom_pointrange(aes(ymin = CI_low, ymax = CI_high), 
+                  size = 1,linewidth = 1)+
+  scale_color_manual(values = farg)+
+    geom_hline(yintercept = 0, linetype = "dashed") +
+  theme_classic()+
+  #ylim(-0.2,0.4) +
+  theme(text=element_text(size=20)) + 
+  theme(legend.position = "none")+
+    theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank())+
+  labs(x="", y = "")+
+ theme(aspect.ratio=3)+
+ theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+  coord_flip();p1
+
+
+p2 = es_alpha %>%
+   filter(Community == "Bacteria") %>%
+  filter(Covariates == 0) %>%
+  filter(Diversity == "C-cycling") %>%
+  ggplot(aes(x= Comparison, y = Omega2_partial, color = Comparison))+
+  geom_pointrange(aes(ymin = CI_low, ymax = CI_high), 
+                  size = 1,linewidth = 1)+
+  scale_color_manual(values = farg)+
+    geom_hline(yintercept = 0, linetype = "dashed") +
+  theme_classic()+
+  #ylim(0,1) +
+  theme(text=element_text(size=20)) + 
+  theme(legend.position = "none")+
+    theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank())+
+  labs(x="", y = "")+
+ theme(aspect.ratio=3)+
+ theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+  coord_flip();p2
+
+```
+
+
+```{r effect size P-cycling diversity}
+
+#Fungi
+p1 = es_alpha %>%
+   filter(Community == "Fungi") %>%
+  filter(Covariates == 0) %>%
+  filter(Diversity == "P-cycling") %>%
+  ggplot(aes(x= Comparison, y = Omega2_partial, color = Comparison))+
+  geom_pointrange(aes(ymin = CI_low, ymax = CI_high), 
+                  size = 1,linewidth = 1)+
+  scale_color_manual(values = farg)+
+    geom_hline(yintercept = 0, linetype = "dashed") +
+  theme_classic()+
+  #ylim(-0.2,0.4) +
+  theme(text=element_text(size=20)) + 
+  theme(legend.position = "none")+
+    theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank())+
+  labs(x="", y = "")+
+ theme(aspect.ratio=3)+
+ theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+  coord_flip();p1
+
+
+p2 = es_alpha %>%
+   filter(Community == "Bacteria") %>%
+  filter(Covariates == 0) %>%
+  filter(Diversity == "P-cycling") %>%
+  ggplot(aes(x= Comparison, y = Omega2_partial, color = Comparison))+
+  geom_pointrange(aes(ymin = CI_low, ymax = CI_high), 
+                  size = 1,linewidth = 1)+
+  scale_color_manual(values = farg)+
+    geom_hline(yintercept = 0, linetype = "dashed") +
+  theme_classic()+
+  #ylim(0,1) +
+  theme(text=element_text(size=20)) + 
+  theme(legend.position = "none")+
+    theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank())+
+  labs(x="", y = "")+
+ theme(aspect.ratio=3)+
+ theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+  coord_flip();p2
+
+```
+
+
+```{r effect size N-cycling diversity}
+
+p2 = es_alpha %>%
+   filter(Community == "Bacteria") %>%
+  filter(Covariates == 0) %>%
+  filter(Diversity == "N-cycling") %>%
+  ggplot(aes(x= Comparison, y = Omega2_partial, color = Comparison))+
+  geom_pointrange(aes(ymin = CI_low, ymax = CI_high), 
+                  size = 1,linewidth = 1)+
+  scale_color_manual(values = farg)+
+    geom_hline(yintercept = 0, linetype = "dashed") +
+  theme_classic()+
+  #ylim(0,1) +
+  theme(text=element_text(size=20)) + 
+  theme(legend.position = "none")+
+    theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank())+
+  labs(x="", y = "")+
+ theme(aspect.ratio=3)+
+ theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+  coord_flip();p2
+
+```
+
+
+
+
+
+
+
+
