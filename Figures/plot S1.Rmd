@@ -1,0 +1,229 @@
+---
+title: "plot S1"
+author: "Tord Ranheim"
+date: '2025-04-28'
+output:
+  html_document:
+    keep_md: no
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dev = "png",
+                      dpi=300,
+                      echo=F,
+                      cache=T, echo=T)
+```
+
+
+```{r}
+rm(list=ls())
+```
+
+
+Libraries
+```{r}
+library(dplyr)
+library(vegan)
+library(tidyr)
+library(ggplot2)
+library(ggpubr)
+```
+
+
+Data loading
+```{r Load data}
+
+#Load metadata
+metadata = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Processing/Metadata/Result/metadata.txt")
+row.names(metadata) = metadata$Sample
+
+
+```
+
+
+
+```{r Load results}
+
+vs_ad = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Alpha diversity/Variable selection/Results/results_variable_selection.txt")
+
+hp_ad = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Revision/diversity/results/hierarchical.txt")
+
+vs_bd = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Beta diversity/Variation partitioning/Results/results_variable_selection_pcoa.txt")
+
+es_bd = read.table("/Users/tranheim/Desktop/Studier/Remiil-NFI/Study 1/Analyses/Revision/diversity/results/es_bd.txt")
+
+vs_fd = read.table()
+
+```
+
+
+                                         PREPARE DATASET
+###################################################################################################
+
+```{r}
+
+#fix names
+names(vs_ad) = c("IncMSE","p.value","IncNodePurity","IncNodePurity.pvalue",
+                 "Variable","Method","Community")
+
+names(vs_bd) = c("IncMSE","p.value","IncNodePurity","IncNodePurity.pvalue",
+                 "Variable","Method","Community")
+
+#Add factor for p-value cutoff
+vs_ad$Sign = ifelse(vs_ad$p.value > 0.05, "not sign", "sign")
+vs_bd$Sign = ifelse(vs_bd$p.value > 0.05, "not sign", "sign")
+
+#Set manual colors for p-value cutoff
+pval = c("grey60","red4")
+
+```
+
+
+
+                                               PLOT
+####################################################################################################
+Use separate barplots and then merge all plots into one
+
+```{r }
+
+p1 = hp_ad %>% 
+  filter(Community == "Fungi") %>%
+  filter(Diversity == "Taxonomic") %>%
+  ggplot(aes(x = reorder(Factor, Individual), Individual, fill = Factor)) +
+  geom_bar(stat = "identity") +
+  scale_fill_viridis_d()+
+  theme_classic()+
+    theme(text=element_text(size=17)) + 
+   guides(fill="none") + 
+   theme(aspect.ratio=3)+
+    labs(x = "", y = "Contribution")+
+   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+    coord_flip();p1
+
+p2 = vs_ad %>% 
+  filter(Community == "Fungi") %>%
+  filter(Method == "Omitted") %>%
+ggplot(aes(x = reorder(Variable, IncMSE), IncMSE)) +
+  geom_bar(stat = "identity", aes(fill = Sign)) +
+  scale_fill_manual(values = pval)+
+  facet_wrap(~Community) +
+  coord_flip() +
+  theme_bw()+
+    theme(text=element_text(size=17)) + 
+   guides(fill="none") + 
+    labs(x = "", y = "IncMSE (%)");p2
+
+
+p3 = hp_ad %>% 
+  filter(Community == "Bacteria") %>%
+  filter(Diversity == "Taxonomic") %>%
+  ggplot(aes(x = reorder(Factor, Individual), Individual, fill = Factor)) +
+  geom_bar(stat = "identity") +
+  scale_fill_viridis_d()+
+  theme_classic()+
+    theme(text=element_text(size=17)) +  
+   guides(fill="none") + 
+   theme(aspect.ratio=3)+
+    labs(x = "", y = "Contribution")+
+   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+    coord_flip();p3
+
+p4 = vs_ad %>% 
+  filter(Community == "Bacteria") %>%
+  filter(Method == "Omitted") %>%
+ggplot(aes(x = reorder(Variable, IncMSE), IncMSE)) +
+  geom_bar(stat = "identity", aes(fill = Sign)) +
+  scale_fill_manual(values = pval)+
+  facet_wrap(~Community) +
+  coord_flip() +
+  theme_bw()+
+    theme(text=element_text(size=17)) + 
+   guides(fill="none") + 
+    labs(x = "", y = "IncMSE (%)");p4
+
+```
+
+
+```{r plot taxonomic diversity}
+
+ggarrange(p2,p1, p4, p3)
+
+```
+
+```{r }
+
+#Beta diversity
+p1 = es_bd %>% 
+  filter(Community == "Fungi") %>%
+  filter(Covariates == 1) %>%
+  filter(Factor != "Residual") %>%
+  filter(Factor != "Total") %>%
+  filter(Diversity == "Taxonomic") %>%
+  ggplot(aes(x = reorder(Factor, R2*100), R2*100, fill = Factor)) +
+  geom_bar(stat = "identity") +
+  scale_fill_viridis_d()+
+  theme_classic()+
+    theme(text=element_text(size=17)) + 
+   guides(fill="none") + 
+   theme(aspect.ratio=3)+
+    labs(x = "", y = "Explained variance (R2)")+
+   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+    coord_flip();p1
+
+
+p2 = vs_bd %>% 
+  filter(Community == "Fungi") %>%
+  filter(Method == "Omitted") %>%
+ggplot(aes(x = reorder(Variable, IncMSE), IncMSE)) +
+  geom_bar(stat = "identity", aes(fill = Sign)) +
+  scale_fill_manual(values = pval)+
+  facet_wrap(~Community) +
+  coord_flip() +
+  theme_bw()+
+ theme(text=element_text(size=17)) + 
+   guides(fill="none") + 
+    labs(x = "", y = "IncMSE (%)");p2
+
+
+p3 = es_bd %>% 
+  filter(Community == "Bacteria") %>%
+  filter(Covariates == 1) %>%
+  filter(Factor != "Residual") %>%
+  filter(Factor != "Total") %>%
+  filter(Diversity == "Taxonomic") %>%
+  ggplot(aes(x = reorder(Factor, R2*100), R2*100, fill = Factor)) +
+  geom_bar(stat = "identity") +
+  scale_fill_viridis_d()+
+  theme_classic()+
+    theme(text=element_text(size=17)) + 
+   guides(fill="none") + 
+   theme(aspect.ratio=3)+
+    labs(x = "", y = "Explained variance (R2)")+
+   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+    coord_flip();p3
+
+
+p4 = vs_bd %>% 
+  filter(Community == "Bacteria") %>%
+  filter(Method == "Omitted") %>%
+ggplot(aes(x = reorder(Variable, IncMSE), IncMSE)) +
+  geom_bar(stat = "identity", aes(fill = Sign)) +
+  scale_fill_manual(values = pval)+
+  facet_wrap(~Community) +
+  coord_flip() +
+  theme_bw()+
+    theme(text=element_text(size=17)) + 
+   guides(fill="none") + 
+    labs(x = "", y = "IncMSE (%)");p4
+
+```
+```{r plot taxonomic community composition}
+
+ggarrange(p2,p4)
+
+```
+
+
+
