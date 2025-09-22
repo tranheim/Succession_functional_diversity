@@ -9,4 +9,5 @@ ps_caz_fun_rar.RDS
 ps_pcyc_bac_rar.RDS
 ps_pcyc_fun_rar.RDS
 ps_ncyc_bac_rar.RDS
-Contain taxonomic and functional sequences (normalized through SRS-transformation or rarefaction) for bacterial and fungal communities as phyloseq objects
+Contain taxonomic and functional sequences (normalized through SRS-transformation or rarefaction) for bacterial and fungal communities as phyloseq objects,
+including metadata with ecosystem properties, results from substrate-induced respiration and site metadata
