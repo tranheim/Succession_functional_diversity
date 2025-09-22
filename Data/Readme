@@ -1,7 +1,7 @@
 This directory contains the processed data used in the analyses described above. 
 Raw sequencing reads can be found on the NCBI SRA under BioProject PRJNA1238768 (amplicon sequences) and PRJEB56463 (shotgun sequences). 
 
-Other data:
+Source data:
 ps_bacteria_srs.RDS
 ps_fungi_srs.RDS
 ps_caz_bac_rar.RDS
